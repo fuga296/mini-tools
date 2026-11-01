@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wi-Fi QR</title>
+<style>
+:root{--bg:#f4f6fa;--fg:#1c2330;--card:#fff;--ac:#2563eb;--bd:#d5dbe6}
+@media (prefers-color-scheme:dark){:root{--bg:#10141c;--fg:#e8ecf3;--card:#1a2030;--bd:#333c50}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Hiragino Sans",sans-serif}
+main{max-width:520px;margin:0 auto;padding:16px}
+h1{font-size:1.3rem;margin:.2em 0 .6em}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:14px}
+label{display:block;font-weight:600;margin:10px 0 4px;font-size:.9rem}
+input[type=text],input[type=password],select{width:100%;padding:10px;font-size:16px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg)}
+.row{display:flex;gap:8px;align-items:center}
+.row input[type=checkbox]{width:20px;height:20px}
+.inline{display:flex;gap:8px;align-items:center;margin-top:10px}
+button{padding:12px 18px;font-size:16px;border:0;border-radius:8px;background:var(--ac);color:#fff;font-weight:600;cursor:pointer}
+#qrbox{background:#fff;padding:16px;border-radius:12px;display:flex;justify-content:center}
+#qrbox svg{width:100%;max-width:420px;height:auto;display:block}
+#msg{color:#c0392b;min-height:1.4em;font-size:.9rem}
+.note{font-size:.8rem;opacity:.75}
+#ssidprint{text-align:center;font-weight:700;margin:8px 0 0;display:none}
+@media print{
+ body{background:#fff;color:#000}
+ .noprint{display:none!important}
+ main{max-width:none;padding:0}
+ .card{border:0;padding:0}
+ #qrbox{padding:0}
+ #qrbox svg{max-width:none;width:16cm}
+ #ssidprint{display:block}
+}
+</style>
+</head>
+<body>
+<main>
+<h1 class="noprint">Wi-Fi QR コード</h1>
+<div class="card noprint">
+ <label for="ssid">SSID(ネットワーク名)</label>
+ <input id="ssid" type="text" autocomplete="off" autocapitalize="off" spellcheck="false">
+ <label for="enc">暗号化方式</label>
+ <select id="enc"><option value="WPA">WPA/WPA2/WPA3</option><option value="WEP">WEP</option><option value="nopass">なし</option></select>
+ <div id="pwwrap">
+  <label for="pw">パスワード</label>
+  <input id="pw" type="password" autocomplete="off" autocapitalize="off" spellcheck="false">
+  <div class="inline"><input id="show" type="checkbox"><label for="show" style="margin:0;font-weight:400">パスワードを表示</label></div>
+ </div>
+ <div class="inline"><input id="hid" type="checkbox" style="width:20px;height:20px"><label for="hid" style="margin:0;font-weight:400">ステルスSSID(隠しネットワーク)</label></div>
+ <p class="note">入力内容はこの端末のブラウザ内だけで処理され、送信も保存もされません。</p>
+</div>
+<div class="card">
+ <div id="qrbox"></div>
+ <p id="ssidprint"></p>
+ <p id="msg" class="noprint"></p>
+ <div class="noprint"><button id="print" type="button">印刷</button></div>
+</div>
+<p class="note noprint" id="payload"></p>
+</main>
+<script>
+"use strict";
+/* ===== QR コード生成(自前実装・バイトモード・誤り訂正M・バージョン1〜14) ===== */
+var QR=(function(){
+ // [EC語数/ブロック, ブロック数1, データ語数1, ブロック数2, データ語数2]
+ var T=[null,[10,1,16,0,0],[16,1,28,0,0],[26,1,44,0,0],[18,2,32,0,0],[24,2,43,0,0],[16,4,27,0,0],[18,4,31,0,0],
+  [22,2,38,2,39],[22,3,36,2,37],[26,4,43,1,44],[30,1,50,4,51],[22,6,36,2,37],[22,8,37,1,38],[24,4,40,5,41]];
+ var AL=[null,[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66]];
+ var EXP=[],LOG=[];
+ (function(){var x=1;for(var i=0;i<255;i++){EXP[i]=x;LOG[x]=i;x<<=1;if(x&256)x^=0x11d;}for(i=255;i<512;i++)EXP[i]=EXP[i-255];})();
+ function mul(a,b){return a&&b?EXP[LOG[a]+LOG[b]]:0;}
+ function rsGen(n){var g=[1];for(var i=0;i<n;i++){var h=[];for(var j=0;j<=g.length;j++)h[j]=0;
+  for(j=0;j<g.length;j++){h[j]^=g[j];h[j+1]^=mul(g[j],EXP[i]);}g=h;}return g;}
+ function rsEnc(data,n){var g=rsGen(n),r=[];for(var i=0;i<n;i++)r[i]=0;
+  for(i=0;i<data.length;i++){var f=data[i]^r[0];r.shift();r.push(0);if(f)for(var j=0;j<n;j++)r[j]^=mul(g[j+1],f);}return r;}
+ function utf8(s){return Array.prototype.slice.call(new TextEncoder().encode(s));}
+ function dataCap(v){var t=T[v];return t[1]*t[2]+t[3]*t[4];}
+ function fmtBits(mask){ // EC=M(00)
+  var d=(0<<3)|mask,r=d<<10;for(var i=14;i>=10;i--)if((r>>i)&1)r^=0x537<<(i-10);
+  return ((d<<10)|r)^0x5412;}
+ function verBits(v){var r=v<<12;for(var i=17;i>=12;i--)if((r>>i)&1)r^=0x1f25<<(i-12);return (v<<12)|r;}
+ function build(bytes){
+  var ver=0;for(var v=1;v<=14;v++){var cnt=v<10?8:16;if(4+cnt+bytes.length*8<=dataCap(v)*8){ver=v;break;}}
+  if(!ver)throw new Error("文字数が多すぎてQRコードに入りません");
+  var bits=[];function put(val,len){for(var i=len-1;i>=0;i--)bits.push((val>>i)&1);}
+  put(4,4);put(bytes.length,ver<10?8:16);bytes.forEach(function(b){put(b,8);});
+  var cap=dataCap(ver)*8;put(0,Math.min(4,cap-bits.length));while(bits.length%8)bits.push(0);
+  var cw=[];for(var i=0;i<bits.length;i+=8){var b=0;for(var j=0;j<8;j++)b=b<<1|bits[i+j];cw.push(b);}
+  for(var p=0;cw.length<dataCap(ver);p++)cw.push(p%2?0x11:0xec);
+  var t=T[ver],blocks=[],pos=0;
+  for(i=0;i<t[1]+t[3];i++){var n=i<t[1]?t[2]:t[4];blocks.push(cw.slice(pos,pos+n));pos+=n;}
+  var ecs=blocks.map(function(b){return rsEnc(b,t[0]);});
+  var fin=[],maxd=t[3]?t[4]:t[2];
+  for(i=0;i<maxd;i++)blocks.forEach(function(b){if(i<b.length)fin.push(b[i]);});
+  for(i=0;i<t[0];i++)ecs.forEach(function(e){fin.push(e[i]);});
+  var N=ver*4+17,M=[],F=[];
+  for(i=0;i<N;i++){M.push(new Array(N).fill(0));F.push(new Array(N).fill(false));}
+  function set(r,c,v){M[r][c]=v?1:0;F[r][c]=true;}
+  function finder(r,c){for(var y=-1;y<=7;y++)for(var x=-1;x<=7;x++){var rr=r+y,cc=c+x;if(rr<0||cc<0||rr>=N||cc>=N)continue;
+   var on=(y>=0&&y<=6&&(x==0||x==6))||(x>=0&&x<=6&&(y==0||y==6))||(y>=2&&y<=4&&x>=2&&x<=4);set(rr,cc,on);}}
+  finder(0,0);finder(0,N-7);finder(N-7,0);
+  var a=AL[ver];
+  for(i=0;i<a.length;i++)for(j=0;j<a.length;j++){
+   if((i==0&&j==0)||(i==0&&j==a.length-1)||(i==a.length-1&&j==0))continue;
+   for(var y=-2;y<=2;y++)for(var x=-2;x<=2;x++)set(a[i]+y,a[j]+x,Math.max(Math.abs(x),Math.abs(y))!=1);}
+  for(i=8;i<N-8;i++){set(6,i,i%2==0);set(i,6,i%2==0);}
+  set(N-8,8,1);
+  for(i=0;i<9;i++){if(!F[8][i])set(8,i,0);if(!F[i][8])set(i,8,0);}
+  for(i=0;i<8;i++){if(!F[8][N-1-i])set(8,N-1-i,0);if(!F[N-1-i][8])set(N-1-i,8,0);}
+  if(ver>=7){var vb=verBits(ver);for(i=0;i<18;i++){var bt=(vb>>i)&1,q=Math.floor(i/3),w=i%3;set(q,N-11+w,bt);set(N-11+w,q,bt);}}
+  // データ配置
+  var dbits=[];fin.forEach(function(b){for(var k=7;k>=0;k--)dbits.push((b>>k)&1);});
+  var best=null,bestS=1e9;
+  for(var mask=0;mask<8;mask++){
+   var Q=M.map(function(r){return r.slice();}),bi=0,up=true;
+   for(var c=N-1;c>0;c-=2){if(c==6)c--;
+    for(var k=0;k<N;k++){var r=up?N-1-k:k;
+     for(var d=0;d<2;d++){var cc=c-d;if(F[r][cc])continue;var bit=bi<dbits.length?dbits[bi]:0;bi++;
+      var m=[(r+cc)%2==0,r%2==0,cc%3==0,(r+cc)%3==0,(Math.floor(r/2)+Math.floor(cc/3))%2==0,(r*cc)%2+(r*cc)%3==0,((r*cc)%2+(r*cc)%3)%2==0,((r+cc)%2+(r*cc)%3)%2==0][mask];
+      Q[r][cc]=bit^(m?1:0);}}
+    up=!up;}
+   var fb=fmtBits(mask);
+   for(i=0;i<15;i++){var bt2=(fb>>i)&1;
+    if(i<6)Q[i][8]=bt2;else if(i<8)Q[i+1][8]=bt2;else Q[N-15+i][8]=bt2;
+    if(i<8)Q[8][N-1-i]=bt2;else if(i<9)Q[8][15-i]=bt2;else Q[8][14-i]=bt2;}
+   Q[N-8][8]=1;
+   var s=penalty(Q,N);if(s<bestS){bestS=s;best=Q;}}
+  return best;
+ }
+ function penalty(Q,N){var s=0,r,c,k;
+  for(var pass=0;pass<2;pass++){
+   for(r=0;r<N;r++){var run=1;
+    for(c=1;c<N;c++){var a=pass?Q[c][r]:Q[r][c],b=pass?Q[c-1][r]:Q[r][c-1];
+     if(a==b){run++;if(run==5)s+=3;else if(run>5)s++;}else run=1;}
+    for(c=0;c<=N-11;c++){var g=function(i){return pass?Q[c+i][r]:Q[r][c+i];};
+     var p1=[1,0,1,1,1,0,1,0,0,0,0],p2=[0,0,0,0,1,0,1,1,1,0,1],m1=true,m2=true;
+     for(k=0;k<11;k++){if(g(k)!=p1[k])m1=false;if(g(k)!=p2[k])m2=false;}
+     if(m1)s+=40;if(m2)s+=40;}}}
+  for(r=0;r<N-1;r++)for(c=0;c<N-1;c++){var v=Q[r][c];if(v==Q[r][c+1]&&v==Q[r+1][c]&&v==Q[r+1][c+1])s+=3;}
+  var d=0;for(r=0;r<N;r++)for(c=0;c<N;c++)d+=Q[r][c];
+  s+=Math.floor(Math.abs(d*20-N*N*10)/(N*N))*10;return s;}
+ return {encode:function(text){return build(utf8(text));}};
+})();
+
+/* ===== Wi-Fi 文字列 ===== */
+function esc(s){return s.replace(/[\;,:"]/g,function(m){return "\\"+m;});}
+function field(s){ // 16進数だけの値は文字列として扱わせるため引用符で囲む(WIFI形式の仕様)
+ return /^[0-9a-fA-F]+$/.test(s)?'"'+s+'"':esc(s);}
+function wifiString(ssid,enc,pw,hidden){
+ var t="WIFI:T:"+enc+";S:"+field(ssid)+";";
+ if(enc!=="nopass")t+="P:"+field(pw)+";";
+ if(hidden)t+="H:true;";
+ return t+";";
+}
+
+/* ===== 画面 ===== */
+(function(){
+ if(typeof document==="undefined")return;
+ var $=function(i){return document.getElementById(i);};
+ function render(){
+  var enc=$("enc").value,ssid=$("ssid").value;
+  $("pwwrap").style.display=enc==="nopass"?"none":"";
+  $("msg").textContent="";$("qrbox").innerHTML="";$("ssidprint").textContent="";
+  if(!ssid){$("payload").textContent="SSIDを入力するとQRコードが表示されます。";return;}
+  var s=wifiString(ssid,enc,$("pw").value,$("hid").checked),m;
+  try{m=QR.encode(s);}catch(e){$("msg").textContent=e.message;return;}
+  var N=m.length,q=4,d="";
+  for(var r=0;r<N;r++)for(var c=0;c<N;c++)if(m[r][c])d+="M"+(c+q)+" "+(r+q)+"h1v1h-1z";
+  var sz=N+q*2;
+  $("qrbox").innerHTML='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+sz+' '+sz+'" shape-rendering="crispEdges" role="img" aria-label="Wi-Fi接続用QRコード"><rect width="'+sz+'" height="'+sz+'" fill="#fff"/><path d="'+d+'" fill="#000"/></svg>';
+  $("ssidprint").textContent="Wi-Fi: "+ssid;
+  $("payload").textContent="";
+ }
+ ["ssid","pw","enc","hid"].forEach(function(i){$(i).addEventListener("input",render);$(i).addEventListener("change",render);});
+ $("show").addEventListener("change",function(){$("pw").type=this.checked?"text":"password";});
+ $("print").addEventListener("click",function(){window.print();});
+ render();
+ window.__wifi=wifiString;
+})();
+</script>
+</body>
+</html>
