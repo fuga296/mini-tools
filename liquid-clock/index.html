@@ -67,23 +67,23 @@ function draw(){
  var hh=pad(d.getHours()),mm=pad(d.getMinutes());
  if(off.width!==cv.width||off.height!==cv.height){off.width=cv.width;off.height=cv.height;}
  if(mask.width!==cv.width||mask.height!==cv.height){mask.width=cv.width;mask.height=cv.height;}
- // 文字のサイズとレイアウト(縦画面向けに「時」の下に「分」を積む)
+ // 文字のサイズとレイアウト(横一列で「時:分」)
  var fam='900 100px system-ui,-apple-system,"Hiragino Sans",sans-serif';
  g.setTransform(dpr,0,0,dpr,0,0);g.font=fam;
- var w100=Math.max(g.measureText("00").width,g.measureText(hh).width,g.measureText(mm).width);
- var size=Math.min(100*W*0.84/w100,H*0.34),cap=size*0.73,gap=size*0.14;
+ var txt=hh+":"+mm,w100=Math.max(g.measureText("00:00").width,g.measureText(txt).width);
+ var size=100*W*0.94/w100,cap=size*0.73;
  var fnt='900 '+size+'px system-ui,-apple-system,"Hiragino Sans",sans-serif';
- var blockH=cap*2+gap,top=H*0.47-blockH/2,y1=top+cap,y2=top+cap*2+gap,bot=y2;
+ var top=H*0.47-cap/2,y1=top+cap,bot=y1;
  // 背景
  var bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,"#0b1020");bg.addColorStop(1,"#141b33");
  g.fillStyle=bg;g.fillRect(0,0,W,H);
  g.font=fnt;g.textAlign="center";g.textBaseline="alphabetic";
  // 空の容器(うっすら + 輪郭)
- g.fillStyle="rgba(255,255,255,0.07)";g.fillText(hh,W/2,y1);g.fillText(mm,W/2,y2);
- g.lineWidth=2;g.strokeStyle="rgba(255,255,255,0.55)";g.strokeText(hh,W/2,y1);g.strokeText(mm,W/2,y2);
+ g.fillStyle="rgba(255,255,255,0.07)";g.fillText(txt,W/2,y1);
+ g.lineWidth=2;g.strokeStyle="rgba(255,255,255,0.55)";g.strokeText(txt,W/2,y1);
  // 液体を offscreen に描き、最後に文字の形で切り抜く(destination-in)
  og.setTransform(dpr,0,0,dpr,0,0);og.globalCompositeOperation="source-over";og.clearRect(0,0,W,H);
- var amp=Math.min(size*0.05,12),base=top-amp*2+(bot-top+amp*4)*(1-f);
+ var amp=Math.min(size*0.06,10),base=top-amp*2+(bot-top+amp*4)*(1-f);
  var base0=COLORS[st.c][1];
  var layers=[{a:amp*0.7,k:0.03,sp:0.7,ph:1.3,k0:0.25,al:0.55},
              {a:amp*0.85,k:0.04,sp:-0.9,ph:3.1,k0:0.1,al:0.75},
@@ -98,10 +98,10 @@ function draw(){
   og.globalAlpha=L.al;og.fillStyle=gr;og.fill();});
  og.globalAlpha=1;
  og.globalCompositeOperation="destination-in";
- // 2つの文字列を一度に切り抜くため、まず別キャンバスに文字マスクを作る
+ // 文字マスクを別キャンバスに作って切り抜く
  mg.setTransform(dpr,0,0,dpr,0,0);mg.clearRect(0,0,W,H);
  mg.font=fnt;mg.textAlign="center";mg.textBaseline="alphabetic";mg.fillStyle="#000";
- mg.fillText(hh,W/2,y1);mg.fillText(mm,W/2,y2);
+ mg.fillText(txt,W/2,y1);
  og.setTransform(1,0,0,1,0,0);og.drawImage(mask,0,0);
  og.globalCompositeOperation="source-over";
  g.setTransform(1,0,0,1,0,0);g.drawImage(off,0,0);g.setTransform(dpr,0,0,dpr,0,0);
