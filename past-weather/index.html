@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>例年の今日の気温</title>
+<style>
+:root{--bg:#f4f6fa;--fg:#1c2330;--card:#fff;--ac:#2563eb;--bd:#d5dbe6;--hot:#e0523a;--cold:#2f74d0;--mean:#1c2330;--off:#c3c9d4;--warn:#b45309}
+@media (prefers-color-scheme:dark){:root{--bg:#10141c;--fg:#e8ecf3;--card:#1a2030;--bd:#333c50;--hot:#ff7a5f;--cold:#6aa8ff;--mean:#e8ecf3;--off:#3b4458;--warn:#f59e0b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Hiragino Sans",sans-serif}
+main{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:1.3rem;margin:.2em 0 .6em}
+h2{font-size:1rem;margin:0 0 8px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:14px}
+label{display:block;font-weight:600;margin:10px 0 4px;font-size:.9rem}
+input,select{width:100%;padding:10px;font-size:16px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid2 label{margin-top:6px}
+button{padding:12px 18px;font-size:16px;border:0;border-radius:8px;background:var(--ac);color:#fff;font-weight:600;cursor:pointer}
+button.sub{background:transparent;color:var(--ac);border:1px solid var(--ac);padding:8px 12px;font-size:.9rem}
+button:disabled{opacity:.5}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border:1px solid var(--bd);border-radius:999px;font-size:.9rem;font-weight:500;margin:0;cursor:pointer;user-select:none}
+.chip input{width:auto;margin:0}
+.chip.on{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 12%,transparent)}
+#status{min-height:1.4em;font-size:.9rem}
+#status.err{color:#c0392b}
+.demo{background:color-mix(in srgb,var(--warn) 15%,transparent);border:1px solid var(--warn);color:var(--fg);border-radius:8px;padding:8px 10px;font-size:.85rem;margin-bottom:10px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.stat{border:1px solid var(--bd);border-radius:10px;padding:8px 4px}
+.stat b{display:block;font-size:1.35rem;font-variant-numeric:tabular-nums}
+.stat span{font-size:.75rem;opacity:.8}
+.hot{color:var(--hot)}.cold{color:var(--cold)}
+.meta{font-size:.8rem;opacity:.8;margin-top:8px}
+#chart svg{width:100%;height:auto;display:block}
+#chart text{fill:var(--fg);font-size:10px}
+.legend{font-size:.75rem;opacity:.85;display:flex;gap:12px;flex-wrap:wrap;margin-top:4px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:3px;vertical-align:-1px}
+table{width:100%;border-collapse:collapse;font-size:.9rem;font-variant-numeric:tabular-nums}
+th,td{padding:6px 4px;border-bottom:1px solid var(--bd);text-align:right}
+th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
+tr.out td{opacity:.4}
+.note{font-size:.8rem;opacity:.75}
+footer{font-size:.8rem;opacity:.8;text-align:center;padding:8px 0 24px}
+footer a{color:var(--ac)}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<h1>例年の今日の気温</h1>
+
+<div class="card">
+  <label for="date">日付(月日)</label>
+  <input type="date" id="date">
+  <label for="place">地点</label>
+  <select id="place"></select>
+  <div id="custom" class="grid2 hidden">
+    <div><label for="lat">緯度</label><input id="lat" type="number" step="0.01" min="-90" max="90" inputmode="decimal"></div>
+    <div><label for="lon">経度</label><input id="lon" type="number" step="0.01" min="-180" max="180" inputmode="decimal"></div>
+  </div>
+  <div class="grid2">
+    <div><label for="y1">開始年</label><input id="y1" type="number" inputmode="numeric"></div>
+    <div><label for="y2">終了年</label><input id="y2" type="number" inputmode="numeric"></div>
+  </div>
+  <p class="note">期間は 1940 年〜昨年まで。1年ごとに1回 API を呼ぶので、長い期間ほど時間がかかります(取得済みはこの端末に保存)。</p>
+  <div class="actions">
+    <button id="go">表示する</button>
+    <button id="demoBtn" class="sub">見本データで表示</button>
+  </div>
+  <div id="status" role="status"></div>
+</div>
+
+<div id="result" class="hidden">
+  <div class="card">
+    <div id="demoNote" class="demo hidden">見本データ(作り物の数値)で表示しています。実際の気温ではありません。</div>
+    <h2 id="title"></h2>
+    <label style="margin-top:0">天気で絞り込み(その日の天気が該当する年だけで平均)</label>
+    <div class="chips" id="filters"></div>
+    <div class="stats" style="margin-top:12px">
+      <div class="stat"><b class="hot" id="avgMax">–</b><span>最高 平均</span></div>
+      <div class="stat"><b id="avgMean">–</b><span>日平均 平均</span></div>
+      <div class="stat"><b class="cold" id="avgMin">–</b><span>最低 平均</span></div>
+    </div>
+    <div class="meta" id="meta"></div>
+  </div>
+
+  <div class="card">
+    <h2>各年の気温</h2>
+    <div id="chart"></div>
+    <div class="legend">
+      <span><i style="background:linear-gradient(var(--hot),var(--cold))"></i>最低〜最高</span>
+      <span><i style="background:var(--mean);height:3px;vertical-align:3px"></i>日平均</span>
+      <span><i style="background:var(--off)"></i>絞り込み対象外</span>
+      <span>点線: 絞り込み後の日平均の平均</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>一覧</h2>
+    <table>
+      <thead><tr><th>年</th><th>天気</th><th>最高</th><th>最低</th><th>平均</th><th>降水</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p class="note">天気はその日の代表天気コード(Open-Meteo の daily weather_code。1日のうち最も悪い天気)を分類したものです。</p>
+  </div>
+</div>
+
+<footer>
+  <a href="https://open-meteo.com/" target="_blank" rel="noopener">Weather data by Open-Meteo.com</a>
+  (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>)・再解析データ ERA5 ほか(Copernicus / ECMWF)
+</footer>
+</main>
+
+<script>
+"use strict";
+const API = "https://archive-api.open-meteo.com/v1/archive";
+const VARS = "temperature_2m_max,temperature_2m_min,temperature_2m_mean,weather_code,precipitation_sum";
+const MIN_YEAR = 1940;
+const CONCURRENCY = 4;
+
+const PLACES = [
+  ["札幌",43.06,141.35],["仙台",38.27,140.87],["東京",35.69,139.69],["新潟",37.92,139.04],
+  ["名古屋",35.18,136.91],["大阪",34.69,135.50],["広島",34.40,132.46],["高松",34.34,134.04],
+  ["福岡",33.59,130.40],["鹿児島",31.56,130.56],["那覇",26.21,127.68]
+];
+
+// WMO weather code → 分類
+const CATS = [
+  {id:"sun",  name:"晴れ",   icon:"☀️", codes:[0,1]},
+  {id:"cloud",name:"くもり", icon:"☁️", codes:[2,3,45,48]},
+  {id:"rain", name:"雨",     icon:"🌧️", codes:[51,53,55,56,57,61,63,65,66,67,80,81,82]},
+  {id:"snow", name:"雪",     icon:"❄️", codes:[71,73,75,77,85,86]},
+  {id:"storm",name:"雷雨",   icon:"⛈️", codes:[95,96,99]}
+];
+function catOf(code){ if(code==null) return null; return CATS.find(c=>c.codes.includes(code)) || null; }
+
+const $ = id => document.getElementById(id);
+const store = {
+  get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+
+const pad = n => String(n).padStart(2,"0");
+const isLeap = y => (y%4===0 && y%100!==0) || y%400===0;
+const fmt = v => v==null || isNaN(v) ? "–" : v.toFixed(1);
+
+// ---------- 初期化 ----------
+const today = new Date();
+const lastYear = today.getFullYear()-1;
+$("date").value = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+$("y1").value = lastYear-29; $("y2").value = lastYear;
+$("y1").min = $("y2").min = MIN_YEAR; $("y1").max = $("y2").max = lastYear;
+
+PLACES.forEach(([n],i)=>$("place").add(new Option(n,String(i))));
+$("place").add(new Option("現在地(端末の位置情報)","geo"));
+$("place").add(new Option("緯度・経度を入力","custom"));
+const saved = store.get("pw:prefs") || {};
+if(saved.place!=null) $("place").value = saved.place; else $("place").value = "2";
+if(saved.lat!=null){ $("lat").value = saved.lat; $("lon").value = saved.lon; }
+$("custom").classList.toggle("hidden", !["custom","geo"].includes($("place").value));
+
+$("place").addEventListener("change", ()=>{
+  const v = $("place").value;
+  $("custom").classList.toggle("hidden", v!=="custom" && v!=="geo");
+  if(v==="geo") locate();
+});
+
+function locate(){
+  if(!navigator.geolocation){ setStatus("この端末では位置情報が使えません。", true); return; }
+  setStatus("位置情報を取得中…");
+  navigator.geolocation.getCurrentPosition(p=>{
+    $("lat").value = p.coords.latitude.toFixed(2);
+    $("lon").value = p.coords.longitude.toFixed(2);
+    $("custom").classList.remove("hidden");
+    setStatus("現在地を取得しました。「表示する」を押してください。");
+  }, e=>setStatus("位置情報を取得できませんでした: "+e.message, true), {timeout:10000});
+}
+
+function setStatus(msg, err){ $("status").textContent = msg; $("status").className = err ? "err" : ""; }
+
+function readInput(){
+  const d = $("date").value;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) throw new Error("日付を選んでください。");
+  const [, m, day] = d.split("-").map(Number);
+  let y1 = parseInt($("y1").value,10), y2 = parseInt($("y2").value,10);
+  if(isNaN(y1)||isNaN(y2)) throw new Error("開始年と終了年を入れてください。");
+  if(y1>y2) [y1,y2] = [y2,y1];
+  y1 = Math.max(MIN_YEAR,y1); y2 = Math.min(lastYear,y2);
+  if(y1>y2) throw new Error(`期間は ${MIN_YEAR}〜${lastYear} 年の範囲で指定してください。`);
+  const pv = $("place").value;
+  let name, lat, lon;
+  if(pv==="custom" || pv==="geo"){
+    lat = parseFloat($("lat").value); lon = parseFloat($("lon").value);
+    if(isNaN(lat)||isNaN(lon)||Math.abs(lat)>90||Math.abs(lon)>180) throw new Error("緯度・経度を正しく入れてください。");
+    name = pv==="geo" ? `現在地(${lat.toFixed(2)}, ${lon.toFixed(2)})` : `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
+  } else { [name,lat,lon] = PLACES[+pv]; }
+  store.set("pw:prefs", {place:pv, lat:$("lat").value||null, lon:$("lon").value||null});
+  return {m, day, y1, y2, name, lat:+lat.toFixed(2), lon:+lon.toFixed(2)};
+}
+
+// その年の対象日(2/29 は平年なら 2/28 で代用)
+function dateFor(y,m,d){
+  if(m===2 && d===29 && !isLeap(y)) return {iso:`${y}-02-28`, sub:true};
+  return {iso:`${y}-${pad(m)}-${pad(d)}`, sub:false};
+}
+
+// ---------- 取得 ----------
+// API 応答(daily 形式)から1日分を取り出す。見本データも同じ形式で通す。
+function parseDaily(json){
+  const dl = json && json.daily;
+  if(!dl || !dl.time || !dl.time.length) throw new Error("応答にデータがありません");
+  return {max:dl.temperature_2m_max[0], min:dl.temperature_2m_min[0], mean:dl.temperature_2m_mean[0],
+          code:dl.weather_code[0], prcp:dl.precipitation_sum[0]};
+}
+
+async function fetchReal(lat, lon, iso){
+  const key = `pw:${lat},${lon}:${iso}`;
+  const c = store.get(key); if(c) return c;
+  const url = `${API}?latitude=${lat}&longitude=${lon}&start_date=${iso}&end_date=${iso}&daily=${VARS}&timezone=auto`;
+  const res = await fetch(url);
+  if(!res.ok){
+    let reason = ""; try{ reason = (await res.json()).reason || ""; }catch(e){}
+    throw new Error(`API エラー ${res.status} ${reason}`);
+  }
+  const v = parseDaily(await res.json());
+  if(v.max!=null) store.set(key, v);
+  return v;
+}
+
+// 見本データ: Open-Meteo の応答と同じ形の JSON を擬似的に作る(実測ではない)
+function sampleResponse(lat, lon, iso){
+  const [y,m,d] = iso.split("-").map(Number);
+  let s = (y*373 + m*31 + d + Math.round(lat*7) + Math.round(lon*3)) >>> 0;
+  const rnd = () => (s = (s*1664525 + 1013904223) >>> 0) / 4294967296;
+  const doy = (Date.UTC(y,m-1,d) - Date.UTC(y,0,1))/864e5;
+  const base = 15 - (Math.abs(lat)-35)*0.8 + 11*Math.sin((doy-110)/365*2*Math.PI)*(lat>=0?1:-1) + (y-1990)*0.025;
+  const r = rnd(); const code = r<.38?[0,1][Math.floor(rnd()*2)] : r<.68?[2,3][Math.floor(rnd()*2)] : r<.93?[51,61,63,80][Math.floor(rnd()*4)] : (base<3?71:95);
+  const wet = code>=50;
+  const mean = base + (rnd()-.5)*5 - (wet?1:0);
+  const amp = (code<=1?5:wet?2.5:3.5) + rnd()*1.5;
+  const r1 = v => Math.round(v*10)/10;
+  return {latitude:lat, longitude:lon, generationtime_ms:0.1, utc_offset_seconds:32400, timezone:"Asia/Tokyo",
+    timezone_abbreviation:"JST", elevation:40,
+    daily_units:{time:"iso8601",temperature_2m_max:"°C",temperature_2m_min:"°C",temperature_2m_mean:"°C",weather_code:"wmo code",precipitation_sum:"mm"},
+    daily:{time:[iso],temperature_2m_max:[r1(mean+amp)],temperature_2m_min:[r1(mean-amp)],temperature_2m_mean:[r1(mean)],
+      weather_code:[code],precipitation_sum:[wet?r1(rnd()*25+0.5):0]}};
+}
+
+let current = null; // {q, demo, items:[{year, iso, sub, v}]}
+let running = false;
+
+async function run(demo){
+  if(running) return;
+  let q; try{ q = readInput(); }catch(e){ setStatus(e.message, true); return; }
+  running = true; $("go").disabled = $("demoBtn").disabled = true;
+  const years = []; for(let y=q.y2; y>=q.y1; y--) years.push(y);
+  const items = years.map(y=>({year:y, ...dateFor(y,q.m,q.day), v:null, err:null}));
+  let done = 0, idx = 0;
+  setStatus(`取得中… 0 / ${items.length}`);
+  async function worker(){
+    while(idx < items.length){
+      const it = items[idx++];
+      try{
+        it.v = demo ? parseDaily(sampleResponse(q.lat,q.lon,it.iso)) : await fetchReal(q.lat,q.lon,it.iso);
+      }catch(e){ it.err = e.message || String(e); }
+      done++; setStatus(`取得中… ${done} / ${items.length}`);
+    }
+  }
+  await Promise.all(Array.from({length:Math.min(CONCURRENCY,items.length)}, worker));
+  running = false; $("go").disabled = $("demoBtn").disabled = false;
+  const ok = items.filter(i=>i.v && i.v.max!=null);
+  const failed = items.filter(i=>i.err);
+  if(!ok.length){
+    setStatus(`データを取得できませんでした(${failed[0] ? failed[0].err : "データなし"})。通信できない環境では「見本データで表示」で画面だけ確認できます。`, true);
+    return;
+  }
+  setStatus(failed.length ? `${failed.length} 年分を取得できませんでした(${failed[0].err})。取得できた年だけで表示しています。` : "");
+  current = {q, demo, items:ok};
+  render();
+}
+
+// ---------- 表示 ----------
+const active = new Set(store.get("pw:filters") || []); // 空 = すべて
+function buildFilters(){
+  const box = $("filters"); box.innerHTML = "";
+  const counts = {}; current.items.forEach(i=>{ const c = catOf(i.v.code); const k = c?c.id:"other"; counts[k]=(counts[k]||0)+1; });
+  const mk = (id, text) => {
+    const l = document.createElement("label"); l.className = "chip";
+    const cb = document.createElement("input"); cb.type = "checkbox"; cb.value = id;
+    cb.checked = id==="all" ? active.size===0 : active.has(id);
+    l.classList.toggle("on", cb.checked);
+    l.append(cb, text); box.append(l);
+    cb.addEventListener("change", ()=>{
+      if(id==="all"){ active.clear(); }
+      else { cb.checked ? active.add(id) : active.delete(id); }
+      store.set("pw:filters", [...active]);
+      render();
+    });
+  };
+  mk("all", "すべて");
+  CATS.forEach(c=>mk(c.id, `${c.icon} ${c.name}(${counts[c.id]||0})`));
+}
+
+function passes(it){ if(active.size===0) return true; const c = catOf(it.v.code); return !!c && active.has(c.id); }
+const avg = a => a.length ? a.reduce((s,x)=>s+x,0)/a.length : NaN;
+
+function render(){
+  const {q, demo, items} = current;
+  $("result").classList.remove("hidden");
+  $("demoNote").classList.toggle("hidden", !demo);
+  $("title").textContent = `${q.name}・${q.m}月${q.day}日(${q.y1}〜${q.y2}年)`;
+  buildFilters();
+  const sel = items.filter(passes);
+  const pick = k => sel.map(i=>i.v[k]).filter(x=>x!=null);
+  const aMax = avg(pick("max")), aMin = avg(pick("min")), aMean = avg(pick("mean"));
+  $("avgMax").textContent = fmt(aMax)+"°"; $("avgMin").textContent = fmt(aMin)+"°"; $("avgMean").textContent = fmt(aMean)+"°";
+  const label = active.size ? CATS.filter(c=>active.has(c.id)).map(c=>c.name).join("・")+"の日だけ" : "全ての年";
+  const hot = sel.reduce((a,b)=>!a||b.v.max>a.v.max?b:a, null), cold = sel.reduce((a,b)=>!a||b.v.min<a.v.min?b:a, null);
+  $("meta").textContent = sel.length
+    ? `${label}:${sel.length} / ${items.length} 年で平均。最も暑かった年 ${hot.year}年(${fmt(hot.v.max)}°)、最も寒かった年 ${cold.year}年(${fmt(cold.v.min)}°)。`
+    : `${label}:該当する年がありません。`;
+  if(items.some(i=>i.sub)) $("meta").textContent += " 平年は2月28日で代用。";
+  drawChart(items, sel.length ? aMean : NaN);
+  const tb = $("rows"); tb.innerHTML = "";
+  items.forEach(i=>{
+    const c = catOf(i.v.code);
+    const tr = document.createElement("tr"); if(!passes(i)) tr.className = "out";
+    tr.innerHTML = `<td>${i.year}${i.sub?"*":""}</td><td>${c?c.icon+" "+c.name:"–"}</td><td class="hot">${fmt(i.v.max)}</td><td class="cold">${fmt(i.v.min)}</td><td>${fmt(i.v.mean)}</td><td>${i.v.prcp==null?"–":i.v.prcp.toFixed(1)}</td>`;
+    tb.append(tr);
+  });
+}
+
+function drawChart(items, aMean){
+  const data = items.slice().reverse(); // 古い年→新しい年
+  const n = data.length, W = 320, H = 180, L = 26, R = 6, T = 8, B = 20;
+  const lo = Math.floor(Math.min(...data.map(i=>i.v.min)) - 1), hi = Math.ceil(Math.max(...data.map(i=>i.v.max)) + 1);
+  const y = v => T + (hi - v) / (hi - lo || 1) * (H - T - B);
+  const step = (W - L - R) / n, bw = Math.max(1.5, Math.min(10, step*0.6));
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="各年の最低・最高・日平均気温">`;
+  s += `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--hot)"/><stop offset="1" stop-color="var(--cold)"/></linearGradient></defs>`;
+  const tickStep = (hi-lo) > 24 ? 10 : 5;
+  for(let t = Math.ceil(lo/tickStep)*tickStep; t <= hi; t += tickStep){
+    s += `<line x1="${L}" x2="${W-R}" y1="${y(t)}" y2="${y(t)}" stroke="var(--bd)" stroke-width=".5"/><text x="${L-3}" y="${y(t)+3}" text-anchor="end">${t}°</text>`;
+  }
+  const every = Math.ceil(n / 6);
+  data.forEach((it, k) => {
+    const cx = L + step*(k+.5), on = passes(it);
+    s += `<rect x="${cx-bw/2}" y="${y(it.v.max)}" width="${bw}" height="${Math.max(1, y(it.v.min)-y(it.v.max))}" rx="${bw/3}" fill="${on?"url(#g)":"var(--off)"}"><title>${it.year}年 最高${fmt(it.v.max)}° 最低${fmt(it.v.min)}°</title></rect>`;
+    if(on && it.v.mean!=null) s += `<line x1="${cx-bw/2-1}" x2="${cx+bw/2+1}" y1="${y(it.v.mean)}" y2="${y(it.v.mean)}" stroke="var(--mean)" stroke-width="1.5"/>`;
+    if((n-1-k) % every === 0) s += `<text x="${cx}" y="${H-6}" text-anchor="middle">${it.year}</text>`;
+  });
+  if(!isNaN(aMean)) s += `<line x1="${L}" x2="${W-R}" y1="${y(aMean)}" y2="${y(aMean)}" stroke="var(--mean)" stroke-dasharray="3 3" stroke-width="1"/>`;
+  $("chart").innerHTML = s + "</svg>";
+}
+
+$("go").addEventListener("click", ()=>run(false));
+$("demoBtn").addEventListener("click", ()=>run(true));
+if(new URLSearchParams(location.search).has("demo")) run(true);
+</script>
+</body>
+</html>
