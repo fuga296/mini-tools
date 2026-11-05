@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f1e7">
+<title>ありえない性格診断</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#f6f1e7;--card:#fffdf8;--ink:#2a2622;--sub:#7a7066;--accent:#c2410c;--line:#e4dccd;--chip:#f1e9da}
+@media (prefers-color-scheme:dark){:root{--bg:#1b1916;--card:#25221e;--ink:#eee8de;--sub:#a59a8c;--accent:#fb923c;--line:#3a352f;--chip:#2f2b26}}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;line-height:1.7}
+main{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 32px)}
+h1{font-size:22px;margin:8px 0 4px;letter-spacing:.04em}
+.lead{color:var(--sub);font-size:14px;margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 16px;margin:12px 0}
+.hidden{display:none!important}
+label{font-size:13px;color:var(--sub)}
+.seedrow{display:flex;gap:8px;margin-top:6px}
+input[type=text]{flex:1;min-width:0;font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-family:ui-monospace,Menlo,monospace}
+button{font:inherit;font-size:15px;border-radius:10px;border:1px solid var(--line);background:var(--chip);color:var(--ink);padding:10px 14px;cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700;width:100%;padding:14px;font-size:17px;margin-top:14px}
+.meta{font-size:12px;color:var(--sub);display:flex;justify-content:space-between;gap:8px}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:8px 0 14px}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.src{display:inline-block;font-size:11px;background:var(--chip);border-radius:999px;padding:2px 10px;color:var(--sub)}
+.q{font-size:18px;font-weight:700;margin:10px 0 14px;line-height:1.6}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opts button{text-align:left;background:var(--bg);padding:13px 14px}
+.opts button:active{background:var(--chip)}
+.back{margin-top:12px;font-size:13px;background:none;border:0;color:var(--sub);padding:4px 0}
+.spin{text-align:center;padding:40px 0}
+.spin .dots{font-size:28px;letter-spacing:.3em;color:var(--accent)}
+.res-sub{font-size:13px;color:var(--sub);margin:0}
+.res-type{font-size:24px;font-weight:800;margin:4px 0 2px;line-height:1.4}
+.res-code{font-family:ui-monospace,Menlo,monospace;font-size:15px;color:var(--accent);font-weight:700}
+h2{font-size:15px;margin:0 0 8px;color:var(--accent)}
+.metrics{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:14px}
+.metrics span:nth-child(even){font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+ul{margin:0;padding-left:1.2em}
+.code-list{font-size:13px;margin:6px 0 0}
+.desc p{margin:0 0 8px}
+.small{font-size:12px;color:var(--sub)}
+.share{display:flex;gap:8px;flex-wrap:wrap}
+.share button{flex:1}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 20px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<main>
+ <h1>ありえない性格診断</h1>
+ <p class="lead">いろいろな診断の質問をまぜた、根拠のない性格診断です。</p>
+
+ <section id="start" class="card">
+  <label for="seed">シード(同じシードなら同じ質問・同じ結果)</label>
+  <div class="seedrow">
+   <input id="seed" type="text" inputmode="latin" autocomplete="off" spellcheck="false" maxlength="40">
+   <button id="reroll" type="button" aria-label="新しいシード">🎲</button>
+  </div>
+  <p class="small" id="startInfo"></p>
+  <button id="go" class="primary" type="button">診断をはじめる</button>
+ </section>
+
+ <section id="quiz" class="card hidden">
+  <div class="meta"><span id="qnum"></span><span id="qseed"></span></div>
+  <div class="bar"><i id="prog"></i></div>
+  <span class="src" id="qsrc"></span>
+  <div class="q" id="qtext"></div>
+  <div class="opts" id="opts"></div>
+  <button class="back" id="back" type="button">← 前の質問</button>
+ </section>
+
+ <section id="analyzing" class="card hidden">
+  <div class="spin"><div class="dots" id="dots">・・・</div><p id="anaText">回答を分析しています</p></div>
+ </section>
+
+ <section id="result" class="hidden"></section>
+</main>
+<div class="toast" id="toast"></div>
+<script src="data.js"></script>
+<script>
+"use strict";
+// ===== 設定(ここを変えると挙動が変わる) =====
+var CONFIG={
+ questionCount:12,   // 1回の診断の設問数
+ analyzeMs:1600,     // 「分析中」表示の長さ(ミリ秒)
+ descCount:5,        // 解説文の数
+ metricCount:6,      // スコア項目の数
+ traitCount:3,       // 長所・短所の数(1つは両方に重複させる)
+ jobCount:3,         // 向いている職業の数
+ seedLength:8,       // 自動で作るシードの文字数
+ maxPerGenre:3       // 1ジャンルから選ぶ設問の上限(ごちゃまぜ度を保つ)
+};
+var D=window.ABSURD_DATA;
+var $=function(i){return document.getElementById(i);};
+
+// ===== シード付き乱数(xmur3 → mulberry32) =====
+function hashStr(str){var h=1779033703^str.length;for(var i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353);h=h<<13|h>>>19;}
+ h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);return (h^=h>>>16)>>>0;}
+function makeRng(str){var a=hashStr(str);return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
+function int(r,n){return Math.floor(r()*n);}
+function pick(r,a){return a[int(r,a.length)];}
+function shuffle(r,a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=int(r,i+1),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function pickN(r,a,n){return shuffle(r,a).slice(0,Math.min(n,a.length));}
+function newSeed(){var c="abcdefghjkmnpqrstuvwxyz23456789",s="";var u=new Uint32Array(CONFIG.seedLength);
+ (window.crypto&&crypto.getRandomValues)?crypto.getRandomValues(u):u.forEach(function(_,i){u[i]=Math.random()*1e9;});
+ for(var i=0;i<u.length;i++)s+=c[u[i]%c.length];return s;}
+
+// ===== 設問の組み立て(シードだけで決まる) =====
+function buildQuiz(seed){
+ var r=makeRng("q|"+seed),all=[];
+ Object.keys(D.GENRES).forEach(function(g){D.GENRES[g].forEach(function(t){all.push({g:g,t:t});});});
+ var count={},out=[];
+ shuffle(r,all).forEach(function(q){if(out.length>=CONFIG.questionCount)return;
+  if((count[q.g]||0)>=CONFIG.maxPerGenre)return;count[q.g]=(count[q.g]||0)+1;out.push(q);});
+ return out.map(function(q){var p=q.t.split("|");
+  return {genre:q.g,text:p[0],opts:p.length>1?p.slice(1):pick(r,D.CHOICE_SETS)};});
+}
+
+// ===== 結果の組み立て(シードだけで決まる。回答は使わない) =====
+function buildResult(seed,quiz){
+ var r=makeRng("r|"+seed);
+ function n(){return 1+int(r,99);}
+ function typeName(){return pick(r,D.TYPE_ADJ)+pick(r,D.TYPE_NOUN);}
+ var type=typeName();
+ function fill(s){return s.replace(/\{n\}/g,function(){return n();}).replace(/\{m\}/g,function(){return 1+int(r,999);})
+  .replace(/\{q\}/g,function(){return 1+int(r,quiz.length);}).replace(/\{t\}/g,function(){return type;})
+  .replace(/\{x\}/g,function(){return pick(r,D.TRAITS);});}
+ var L="ABCDEFGHJKLMNPQRSTUVWXYZ",code=[],codeMeaning=[];
+ for(var i=0;i<4;i++){var ch=L[int(r,L.length)];code.push(ch);codeMeaning.push(ch+" … "+pick(r,D.CODE_MEANINGS));}
+ var traits=pickN(r,D.TRAITS,CONFIG.traitCount*2),both=traits[0];
+ var strengths=[both].concat(traits.slice(1,CONFIG.traitCount));
+ var weak=shuffle(r,[both].concat(traits.slice(CONFIG.traitCount,CONFIG.traitCount*2-1)));
+ var good=typeName(),bad=r()<.35?good:typeName(); // ときどき「相性の良い」と「悪い」が同じになる
+ return {
+  intro:fill(pick(r,D.INTRO)),type:type,code:code.join("")+"-"+(1+int(r,9))+"型",codeMeaning:codeMeaning,
+  rarity:fill(pick(r,D.RARITY)),
+  metrics:pickN(r,D.METRICS,CONFIG.metricCount).map(function(m){return [m,fill(pick(r,D.METRIC_FORMATS))];}),
+  desc:pickN(r,D.DESC,CONFIG.descCount).map(fill),
+  strengths:strengths,weak:weak,
+  good:pick(r,D.COMPAT_GOOD).replace("{t}",good),bad:fill(pick(r,D.COMPAT_BAD).replace("{t}",bad)),
+  jobs:pickN(r,D.JOBS,CONFIG.jobCount),item:pick(r,D.LUCKY_ITEMS),place:pick(r,D.LUCKY_PLACES),
+  advice:fill(pick(r,D.ADVICE)),note:pick(r,D.DISCLAIMERS)
+ };
+}
+
+// ===== 画面 =====
+var st={seed:"",quiz:[],i:0};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function cleanSeed(s){return String(s||"").trim().slice(0,40);}
+function shareUrl(){var u=new URL(location.href);u.search="";u.hash="";u.searchParams.set("seed",st.seed);return u.toString();}
+function setUrl(){try{history.replaceState(null,"",shareUrl());}catch(e){}}
+function show(id){["start","quiz","analyzing","result"].forEach(function(k){$(k).classList.toggle("hidden",k!==id);});scrollTo(0,0);}
+function toast(t){var el=$("toast");el.textContent=t;el.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(function(){el.classList.remove("on");},1800);}
+function updateStartInfo(){var s=cleanSeed($("seed").value);
+ if(!s){$("startInfo").textContent="シードを入れてください。";$("go").disabled=true;return;}
+ $("go").disabled=false;var q=buildQuiz(s),g={};q.forEach(function(x){g[x.genre]=1;});
+ $("startInfo").textContent="全"+q.length+"問。"+Object.keys(g).length+"種類の診断から出題されます。";}
+
+function startQuiz(){st.seed=cleanSeed($("seed").value);if(!st.seed)return;st.quiz=buildQuiz(st.seed);st.i=0;setUrl();renderQ();show("quiz");}
+function renderQ(){var q=st.quiz[st.i],tot=st.quiz.length;
+ $("qnum").textContent="第"+(st.i+1)+"問 / 全"+tot+"問";$("qseed").textContent="シード: "+st.seed;
+ $("prog").style.width=(st.i/tot*100)+"%";$("qsrc").textContent="出典: "+q.genre;$("qtext").textContent=q.text;
+ var box=$("opts");box.innerHTML="";
+ q.opts.forEach(function(o){var b=document.createElement("button");b.type="button";b.textContent=o;b.onclick=next;box.appendChild(b);});
+ $("back").classList.toggle("hidden",st.i===0);}
+function next(){if(st.i<st.quiz.length-1){st.i++;renderQ();scrollTo(0,0);}else analyze();}
+function analyze(){show("analyzing");var msgs=["回答を分析しています","前世のデータと照合しています","矛盾を整えています","結果を少し盛っています"],k=0;
+ $("anaText").textContent=msgs[0];var tm=setInterval(function(){k++;$("anaText").textContent=msgs[k%msgs.length];},Math.max(200,CONFIG.analyzeMs/msgs.length));
+ setTimeout(function(){clearInterval(tm);renderResult();},CONFIG.analyzeMs);}
+function li(a){return a.map(function(x){return "<li>"+esc(x)+"</li>";}).join("");}
+function renderResult(){var R=buildResult(st.seed,st.quiz);
+ $("result").innerHTML=
+ '<div class="card"><p class="res-sub">'+esc(R.intro)+'</p><p class="res-sub" style="margin-top:10px">あなたは</p>'+
+ '<div class="res-type">「'+esc(R.type)+'」タイプ</div><div class="res-code">'+esc(R.code)+'</div>'+
+ '<ul class="code-list">'+li(R.codeMeaning)+'</ul><p class="small" style="margin:8px 0 0">'+esc(R.rarity)+'</p></div>'+
+ '<div class="card"><h2>診断スコア</h2><div class="metrics">'+R.metrics.map(function(m){return "<span>"+esc(m[0])+"</span><span>"+esc(m[1])+"</span>";}).join("")+'</div></div>'+
+ '<div class="card desc"><h2>あなたの性格</h2>'+R.desc.map(function(d){return "<p>"+esc(d)+"</p>";}).join("")+'</div>'+
+ '<div class="card"><h2>長所</h2><ul>'+li(R.strengths)+'</ul><h2 style="margin-top:12px">短所</h2><ul>'+li(R.weak)+'</ul></div>'+
+ '<div class="card"><h2>相性</h2><p style="margin:0">'+esc(R.good)+'<br>'+esc(R.bad)+'</p></div>'+
+ '<div class="card"><h2>向いている職業</h2><ul>'+li(R.jobs)+'</ul><h2 style="margin-top:12px">ラッキーアイテム / 場所</h2><p style="margin:0">'+esc(R.item)+' / '+esc(R.place)+'</p></div>'+
+ '<div class="card"><h2>アドバイス</h2><p style="margin:0">'+esc(R.advice)+'</p><p class="small" style="margin:10px 0 0">'+esc(R.note)+'</p></div>'+
+ '<div class="card"><p class="small" style="margin:0 0 8px">シード: <b>'+esc(st.seed)+'</b> ― このURLを送ると、相手も同じ質問・同じ結果になります。</p>'+
+ '<div class="share"><button type="button" id="copy">URLをコピー</button>'+(navigator.share?'<button type="button" id="nshare">共有</button>':'')+'</div>'+
+ '<button type="button" class="primary" id="again">別のシードで診断する</button></div>';
+ show("result");
+ $("copy").onclick=function(){var u=shareUrl();(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){toast("コピーしました");},function(){prompt("このURLをコピーしてください",u);});};
+ if($("nshare"))$("nshare").onclick=function(){navigator.share({title:"ありえない性格診断",text:"「"+R.type+"」タイプでした",url:shareUrl()}).catch(function(){});};
+ $("again").onclick=function(){$("seed").value=newSeed();updateStartInfo();show("start");};
+}
+
+$("seed").addEventListener("input",updateStartInfo);
+$("reroll").onclick=function(){$("seed").value=newSeed();updateStartInfo();};
+$("go").onclick=startQuiz;
+$("back").onclick=function(){if(st.i>0){st.i--;renderQ();}};
+var qs=new URLSearchParams(location.search);
+$("seed").value=cleanSeed(qs.get("seed"))||newSeed();
+if(qs.get("seed"))$("go").textContent="このシードで診断をはじめる";
+updateStartInfo();
+</script>
+</body>
+</html>

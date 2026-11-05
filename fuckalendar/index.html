@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fafaf7">
+<title>fuckalendar</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#fafaf7;--card:#fff;--ink:#1f2328;--sub:#6b7078;--line:#e3e3dc;--chip:#f0f0ea;--red:#d33;--blue:#2563eb;--accent:#111;--hol:#fff1f1;--today:#fde047}
+@media (prefers-color-scheme:dark){:root{--bg:#151618;--card:#1e2023;--ink:#e8e8e3;--sub:#9aa0a6;--line:#33363a;--chip:#2a2d31;--red:#f87171;--blue:#60a5fa;--accent:#e8e8e3;--hol:#3a2224;--today:#a16207}}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif}
+main{max-width:620px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 30px)}
+h1{font-size:22px;margin:4px 0 0;letter-spacing:.02em}
+.lead{color:var(--sub);font-size:13px;margin:2px 0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}
+.lv{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+button{font:inherit;font-size:14px;border-radius:10px;border:1px solid var(--line);background:var(--chip);color:var(--ink);padding:8px 10px;cursor:pointer}
+.lv button{padding:8px 0;line-height:1.2}
+.lv button small{display:block;font-size:10px;color:var(--sub)}
+.lv button[aria-pressed=true]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.lv button[aria-pressed=true] small{color:var(--bg);opacity:.75}
+.seedrow{display:flex;gap:8px;margin-top:10px;align-items:center}
+.seedrow label{font-size:12px;color:var(--sub);white-space:nowrap}
+input[type=text]{flex:1;min-width:0;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-family:ui-monospace,Menlo,monospace}
+.year{text-align:center;font-size:13px;color:var(--sub);margin:0}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0 10px}
+.nav button{width:44px;height:40px;font-size:20px;padding:0}
+.mname{font-size:24px;font-weight:800;text-align:center;line-height:1.2}
+.mname small{display:block;font-size:11px;color:var(--sub);font-weight:400}
+.grid{display:grid;gap:3px}
+.wd{font-size:12px;text-align:center;font-weight:700;padding:4px 0;color:var(--sub)}
+.c-red{color:var(--red)!important}.c-blue{color:var(--blue)!important}
+.cell{aspect-ratio:1/1.05;border-radius:8px;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;position:relative;overflow:hidden;min-width:0;padding:1px;text-align:center;line-height:1.1;word-break:break-all}
+.cell.empty{background:transparent}
+.cell.hol{background:var(--hol);color:var(--red)}
+.cell.hole{color:var(--sub);font-weight:400}
+.cell.today{outline:2px solid var(--today);outline-offset:-2px}
+.cell .tag{font-size:8px;font-weight:400;color:var(--sub);margin-top:1px;white-space:nowrap}
+.hols{font-size:13px;margin:10px 0 0;padding-left:1.2em;color:var(--sub)}
+.hols b{color:var(--red);font-weight:600}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row button{flex:1}
+.year-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.mini{border:1px solid var(--line);border-radius:10px;padding:6px;cursor:pointer;background:var(--card)}
+.mini h3{font-size:13px;margin:0 0 4px;text-align:center}
+.mini .grid{gap:1px}
+.mini .wd{font-size:8px;padding:0}
+.mini .cell{font-size:8px;border-radius:3px;aspect-ratio:auto;height:14px;font-weight:400}
+.mini .cell .tag{display:none}
+details{font-size:13px}
+details summary{cursor:pointer;color:var(--sub)}
+details ol{padding-left:1.4em;margin:8px 0 0}
+details li.off{color:var(--sub);opacity:.5}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 20px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<main>
+ <h1>fuckalendar</h1>
+ <p class="lead">嘘のカレンダー。レベルが上がるほど嘘が増えます。</p>
+
+ <div class="card">
+  <div class="lv" id="lv" role="group" aria-label="レベル"></div>
+  <div class="seedrow"><label for="seed">シード</label><input id="seed" type="text" autocomplete="off" spellcheck="false" maxlength="40"><button id="reroll" type="button" aria-label="新しいシード">🎲</button></div>
+ </div>
+
+ <div class="card" id="monthView">
+  <p class="year" id="year"></p>
+  <div class="nav"><button id="prev" type="button" aria-label="前の月">‹</button><div class="mname" id="mname"></div><button id="next" type="button" aria-label="次の月">›</button></div>
+  <div id="grid"></div>
+  <ul class="hols" id="hols"></ul>
+ </div>
+
+ <div class="card hidden" id="yearView">
+  <p class="year" id="year2" style="margin-bottom:8px"></p>
+  <div class="year-grid" id="ygrid"></div>
+ </div>
+
+ <div class="row">
+  <button id="toggleView" type="button">1年ぶん表示</button>
+  <button id="copy" type="button">URLをコピー</button>
+ </div>
+
+ <div class="card"><details><summary>このレベルで使っている嘘</summary><ol id="methods"></ol></details></div>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+// ===== 設定(ここを変えると嘘の具合が変わる) =====
+var CONFIG={
+ maxLevel:5,
+ l1WeekShift:[1,6],       // Lv1: 曜日を全体で何日ずらすか(範囲)
+ l1MonthJitter:1,          // Lv1: 月ごとの追加のずれ(±)
+ l1DateRotate:3,           // Lv1: 月の始まりの数字を最大いくつずらすか
+ daysRange:[26,35],        // Lv2〜: 1か月の日数
+ extremeDaysRange:[3,45],  // Lv4〜: ときどき出る極端な日数
+ extremeDaysProb:0.15,
+ holidaysPerMonth:[0,3],   // Lv2〜: 架空の祝日の数
+ monthRange:[7,19],        // Lv3〜: 1年の月の数
+ weirdMonthNameProb:0.25,  // Lv3〜: 月名が変になる確率
+ weekLenChoices:[5,6,8,9,10], // Lv4〜: 1週間の日数
+ skipProb:0.08,            // Lv4〜: 日付が飛ぶ確率(1マスごと)
+ dupProb:0.06,             // Lv4〜: 日付が重複する確率
+ holeProb:0.04,            // Lv4〜: 欠番マスの確率
+ negStartProb:0.3,         // Lv4〜: 0日やマイナスの日から始まる確率
+ formatProb:0.3,           // Lv5: 数字の表記が変わる確率
+ reverseProb:0.3,          // Lv5: 月が逆向きに進む確率
+ swapProb:0.1,             // Lv5: 隣のマスと入れ替わる確率
+ monthWeekdayProb:0.5,     // Lv5: 月ごとに曜日の並びが変わる確率
+ todayCount:[0,4]          // Lv5: 「今日」の数(年全体)
+};
+var LEVEL_NAMES=["ずれ","水増し","異世界","崩壊","混沌"];
+// 嘘の方法の一覧([導入レベル, 名前])
+var METHODS=[
+ [1,"曜日をずらす(1日目の曜日がずれている)"],
+ [1,"日付をずらす(月の途中の数字から始まり、末尾で1に戻る)"],
+ [2,"月の日数を変える"],
+ [2,"曜日の並び順を入れ替える"],
+ [2,"架空の祝日を入れる"],
+ [3,"月の数を変える"],
+ [3,"謎の月名(0月・13月・裏3月など)"],
+ [3,"曜日の漢字を変える"],
+ [3,"架空の年号にする"],
+ [4,"1週間の日数を変える"],
+ [4,"日付が飛ぶ・重複する"],
+ [4,"0日やマイナスの日から始まる"],
+ [4,"欠番マスを入れる"],
+ [5,"数字の表記を混ぜる(漢数字・ローマ数字・全角・小数・二進数)"],
+ [5,"逆向きに進む月"],
+ [5,"月ごとに曜日の並びが違う"],
+ [5,"マスを入れ替える"],
+ [5,"「今日」がいくつもある(または存在しない)"]
+];
+var BASE_WD=["日","月","火","水","木","金","土"];
+var WD_KANJI="泥鍋雲麺猫塩霧爪鮭傘箸餅暇謎炭苔鍵骨蟹粥湯豆影角綿砂芋酢縄桶糸鈴凪栗鰯茸蛸畳靴犬鳩".split("");
+var ERA=["鍋暦","泥和","霧正","雲治","苔保","骨文","謎応","粥禄","麺永","傘延","ぬ暦","畳元"];
+var WEIRD_MONTHS=["閏月","ほぼ4月","裏3月","13月","0月","月未満","月(仮)","半月","予備月","おまけ月","月月","忘月","もう一回1月","∞月","π月","7.5月","前月","来月","第二月曜月","月じゃない月"];
+var HOLIDAYS=["なんとなくの日","靴下の日(片方)","振替休日の振替休日","昼寝の日","特に何もない記念日","冷蔵庫感謝の日","傘を忘れる日","建国記念日(別の国)","敬老の日の前日の前日","ゆで卵の日","二度寝の日","月の真ん中の日","休みたい日","会議がない日","もう一度元日","雨の日(晴れでも)","静かにする日","数字の日","曜日の日","カレンダーをめくる日","誰かの誕生日","海の日(山)","山の日(海)","すべての日","黙祷(3秒)の日","鍋の日","引き出しを開ける日","忘れ物の日","昨日の日","祝日ではない日"];
+
+// ===== シード付き乱数 =====
+function hashStr(str){var h=1779033703^str.length;for(var i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353);h=h<<13|h>>>19;}
+ h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);return (h^=h>>>16)>>>0;}
+function makeRng(str){var a=hashStr(str);return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
+function int(r,n){return Math.floor(r()*n);}
+function range(r,a){return a[0]+int(r,a[1]-a[0]+1);}
+function pick(r,a){return a[int(r,a.length)];}
+function shuffle(r,a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=int(r,i+1),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function newSeed(){var c="abcdefghjkmnpqrstuvwxyz23456789",s="",u=new Uint32Array(8);
+ if(window.crypto&&crypto.getRandomValues)crypto.getRandomValues(u);else for(var k=0;k<8;k++)u[k]=Math.random()*1e9;
+ for(var i=0;i<8;i++)s+=c[u[i]%c.length];return s;}
+
+// ===== 数字の表記(Lv5) =====
+function kanji(n){if(n===0)return "〇";if(n<0)return "マイナス"+kanji(-n);var d="〇一二三四五六七八九",s="";
+ var t=Math.floor(n/10),o=n%10;if(t>1)s+=d[t];if(t>0)s+="十";if(o>0)s+=d[o];return s;}
+function roman(n){if(n===0)return "N";if(n<0)return "-"+roman(-n);var v=[[50,"L"],[40,"XL"],[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]],s="";
+ v.forEach(function(p){while(n>=p[0]){s+=p[1];n-=p[0];}});return s;}
+function zen(n){return String(n).replace(/[0-9-]/g,function(c){return c==="-"?"−":String.fromCharCode(c.charCodeAt(0)+0xFEE0);});}
+var FORMATS=[kanji,roman,zen,function(n){return n+".5";},function(n){return n<0?"-0b"+(-n).toString(2):"0b"+n.toString(2);},function(n){return "約"+n;}];
+
+// ===== カレンダーの生成(シードとレベルだけで決まる) =====
+function generate(seed,L){
+ var r=makeRng(seed+"|L"+L),yr=makeRng(seed+"|year");
+ var year=1990+int(yr,51); // 年は全レベル共通(シードから)
+ var cal={level:L,year:year,months:[]};
+ // 曜日
+ var weekLen=L>=4?pick(r,CONFIG.weekLenChoices):7;
+ var wd;
+ if(L>=3){var ks=shuffle(r,WD_KANJI).slice(0,weekLen);var red=int(r,weekLen),blue=(red+1+int(r,weekLen-1))%weekLen;
+  wd=ks.map(function(k,i){return {n:k,c:i===red?"c-red":i===blue?"c-blue":""};});}
+ else{wd=BASE_WD.map(function(k,i){return {n:k,c:i===0?"c-red":i===6?"c-blue":""};});
+  if(L>=2){var o=wd;do{wd=shuffle(r,o);}while(wd.every(function(x,i){return x===o[i];}));}}
+ cal.weekLen=weekLen;cal.weekdays=wd;
+ // 年の表示
+ cal.yearLabel=L>=3?pick(r,ERA)+(1+int(r,99))+"年"+(L>=5?"(西暦"+(year+int(r,7)-3)+"年ぐらい)":""):year+"年";
+ // 月の数と名前
+ var mCount=L>=3?range(r,CONFIG.monthRange):12,startNum=L>=3&&r()<.25?0:1;
+ var shift=range(r,CONFIG.l1WeekShift);
+ for(var m=0;m<mCount;m++){
+  var name=(startNum+m)+"月";
+  if(L>=3&&r()<CONFIG.weirdMonthNameProb)name=pick(r,WEIRD_MONTHS);
+  // 日数
+  var days;
+  if(L<2)days=new Date(year,m+1,0).getDate();
+  else if(L>=4&&r()<CONFIG.extremeDaysProb)days=range(r,CONFIG.extremeDaysRange);
+  else days=range(r,CONFIG.daysRange);
+  // 1日目の列
+  var start;
+  if(L<2){var real=new Date(year,m,1).getDay();var j=int(r,CONFIG.l1MonthJitter*2+1)-CONFIG.l1MonthJitter;start=((real+shift+j)%7+7)%7;}
+  else start=int(r,weekLen);
+  // 日付の並び
+  var cells=[];
+  if(L<4){var rot=L===1||r()<.5?int(r,CONFIG.l1DateRotate+1):0;
+   for(var d=0;d<days;d++)cells.push({n:((d+rot)%days)+1});}
+  else{var n=r()<CONFIG.negStartProb?-int(r,4):1;
+   for(var k=0;k<days;k++){
+    if(r()<CONFIG.holeProb){cells.push({hole:true});continue;}
+    cells.push({n:n});
+    if(r()<CONFIG.dupProb)continue; // 次も同じ数字
+    n+=r()<CONFIG.skipProb?2+int(r,3):1;}}
+  // Lv5: 表記・逆向き・入れ替え
+  var mwd=null,rev=false;
+  if(L>=5){
+   if(r()<CONFIG.reverseProb){cells.reverse();rev=true;}
+   for(var s=0;s<cells.length-1;s++)if(r()<CONFIG.swapProb){var t=cells[s];cells[s]=cells[s+1];cells[s+1]=t;s++;}
+   cells.forEach(function(c){if(c.n!==undefined&&r()<CONFIG.formatProb)c.f=int(r,FORMATS.length);});
+   if(r()<CONFIG.monthWeekdayProb)mwd=shuffle(r,wd);}
+  // 祝日
+  var hols=[];
+  if(L>=2){var hn=range(r,CONFIG.holidaysPerMonth);
+   for(var h=0;h<hn;h++){var idx=int(r,cells.length);if(cells[idx].hole||cells[idx].hol)continue;cells[idx].hol=pick(r,HOLIDAYS);hols.push(idx);}}
+  cal.months.push({name:name,start:start,cells:cells,weekdays:mwd,reversed:rev,hols:hols});
+ }
+ // Lv5: 今日
+ if(L>=5){var tc=range(r,CONFIG.todayCount);for(var q=0;q<tc;q++){var mm=cal.months[int(r,mCount)];var ci=int(r,mm.cells.length);if(!mm.cells[ci].hole)mm.cells[ci].today=true;}}
+ return cal;
+}
+function label(c){if(c.hole)return "欠";return c.f!==undefined?FORMATS[c.f](c.n):String(c.n);}
+
+// ===== 表示 =====
+var $=function(i){return document.getElementById(i);};
+var st={seed:"",lv:1,m:0,year:false},cal=null;
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function gridHtml(mo,mini){
+ var wd=mo.weekdays||cal.weekdays,W=cal.weekLen,h='<div class="grid" style="grid-template-columns:repeat('+W+',minmax(0,1fr))">';
+ wd.forEach(function(w){h+='<div class="wd '+w.c+'">'+esc(w.n)+'</div>';});
+ for(var i=0;i<mo.start;i++)h+='<div class="cell empty"></div>';
+ mo.cells.forEach(function(c,i){var col=wd[(mo.start+i)%W].c,cls="cell";
+  if(c.hole)cls+=" hole";if(c.hol)cls+=" hol";if(c.today)cls+=" today";
+  var tag=c.today?"今日":c.hol?"祝":"";
+  h+='<div class="'+cls+(c.hol||c.hole?"":" "+col)+'"'+(c.hol?' title="'+esc(c.hol)+'"':'')+'>'+esc(label(c))+(tag?'<span class="tag">'+tag+'</span>':'')+'</div>';});
+ return h+'</div>';
+}
+function render(){
+ cal=generate(st.seed,st.lv);if(st.m>=cal.months.length)st.m=cal.months.length-1;if(st.m<0)st.m=0;
+ Array.prototype.forEach.call($("lv").children,function(b,i){b.setAttribute("aria-pressed",String(i+1===st.lv));});
+ $("year").textContent=$("year2").textContent=cal.yearLabel;
+ var mo=cal.months[st.m];
+ $("mname").innerHTML=esc(mo.name)+'<small>'+(st.m+1)+' / '+cal.months.length+'か月目 ・ '+mo.cells.length+'マス'+(mo.reversed?' ・ 逆行中':'')+'</small>';
+ $("grid").innerHTML=gridHtml(mo);
+ var hs=mo.cells.filter(function(c){return c.hol;});
+ var todays=cal.months.reduce(function(a,x){return a+x.cells.filter(function(c){return c.today;}).length;},0);
+ $("hols").innerHTML=hs.map(function(c){return '<li><b>'+esc(label(c))+'</b> '+esc(c.hol)+'</li>';}).join("")+
+  (st.lv>=5&&todays===0?'<li>今日は今年のどこにもありません。</li>':'')+(st.lv>=5&&todays>1?'<li>今年は今日が'+todays+'回あります。</li>':'');
+ $("ygrid").innerHTML=cal.months.map(function(x,i){return '<div class="mini" data-m="'+i+'"><h3>'+esc(x.name)+'</h3>'+gridHtml(x,true)+'</div>';}).join("");
+ $("monthView").classList.toggle("hidden",st.year);$("yearView").classList.toggle("hidden",!st.year);
+ $("toggleView").textContent=st.year?"1か月ずつ表示":"1年ぶん表示";
+ $("methods").innerHTML=METHODS.map(function(x){return '<li class="'+(x[0]<=st.lv?"":"off")+'">'+esc(x[1])+' <small>(Lv'+x[0]+'〜)</small></li>';}).join("");
+ try{history.replaceState(null,"",shareUrl());}catch(e){}
+}
+function shareUrl(){var u=new URL(location.href);u.search="";u.hash="";u.searchParams.set("seed",st.seed);u.searchParams.set("lv",st.lv);if(st.m)u.searchParams.set("m",st.m+1);return u.toString();}
+function toast(t){var el=$("toast");el.textContent=t;el.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(function(){el.classList.remove("on");},1800);}
+
+LEVEL_NAMES.forEach(function(n,i){var b=document.createElement("button");b.type="button";b.innerHTML="Lv"+(i+1)+"<small>"+n+"</small>";
+ b.onclick=function(){st.lv=i+1;render();};$("lv").appendChild(b);});
+$("seed").addEventListener("input",function(){var s=$("seed").value.trim().slice(0,40);if(s){st.seed=s;render();}});
+$("reroll").onclick=function(){st.seed=$("seed").value=newSeed();st.m=0;render();};
+$("prev").onclick=function(){st.m=(st.m-1+cal.months.length)%cal.months.length;render();};
+$("next").onclick=function(){st.m=(st.m+1)%cal.months.length;render();};
+$("toggleView").onclick=function(){st.year=!st.year;render();};
+$("ygrid").onclick=function(e){var el=e.target.closest(".mini");if(!el)return;st.m=+el.dataset.m;st.year=false;render();scrollTo(0,0);};
+$("copy").onclick=function(){var u=shareUrl();(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){toast("コピーしました");},function(){prompt("このURLをコピーしてください",u);});};
+(function(){var q=new URLSearchParams(location.search);
+ st.seed=(q.get("seed")||"").trim().slice(0,40)||newSeed();
+ var lv=parseInt(q.get("lv"),10);st.lv=lv>=1&&lv<=CONFIG.maxLevel?lv:1;
+ var m=parseInt(q.get("m"),10);st.m=m>=1?m-1:0;
+ $("seed").value=st.seed;render();})();
+</script>
+</body>
+</html>
