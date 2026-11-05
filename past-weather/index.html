@@ -3,116 +3,126 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>例年の今日の気温</title>
+<title>天気既報</title>
 <style>
-:root{--bg:#f4f6fa;--fg:#1c2330;--card:#fff;--ac:#2563eb;--bd:#d5dbe6;--hot:#e0523a;--cold:#2f74d0;--mean:#1c2330;--off:#c3c9d4;--warn:#b45309}
-@media (prefers-color-scheme:dark){:root{--bg:#10141c;--fg:#e8ecf3;--card:#1a2030;--bd:#333c50;--hot:#ff7a5f;--cold:#6aa8ff;--mean:#e8ecf3;--off:#3b4458;--warn:#f59e0b}}
+:root{--bg:#f7f8fa;--side:#eceff3;--fg:#1d232c;--sub:#5a6573;--ac:#1f5fbf;--bd:#cdd3dc;--hot:#c8432c;--cold:#2a66b8;--mean:#1d232c;--off:#c3c9d4;--warn:#9a5b00}
+@media (prefers-color-scheme:dark){:root{--bg:#12161d;--side:#1a2029;--fg:#e6eaf0;--sub:#9aa5b4;--ac:#6aa8ff;--bd:#333c4a;--hot:#ff7a5f;--cold:#6aa8ff;--mean:#e6eaf0;--off:#3b4458;--warn:#f0a030}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Hiragino Sans",sans-serif}
-main{max-width:640px;margin:0 auto;padding:16px}
-h1{font-size:1.3rem;margin:.2em 0 .6em}
-h2{font-size:1rem;margin:0 0 8px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:14px}
-label{display:block;font-weight:600;margin:10px 0 4px;font-size:.9rem}
-input,select{width:100%;padding:10px;font-size:16px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.grid2 label{margin-top:6px}
-button{padding:12px 18px;font-size:16px;border:0;border-radius:8px;background:var(--ac);color:#fff;font-weight:600;cursor:pointer}
-button.sub{background:transparent;color:var(--ac);border:1px solid var(--ac);padding:8px 12px;font-size:.9rem}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.75 "Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Yu Gothic","Meiryo",sans-serif}
+.app{display:block}
+.side{background:var(--side);border-bottom:1px solid var(--bd);padding:12px 16px}
+.side h1{font-size:1.25rem;line-height:1.4;margin:0 0 8px;letter-spacing:.02em}
+main{padding:16px;max-width:760px}
+label{display:block;font-size:.8rem;color:var(--sub);margin:8px 0 2px}
+input,select{width:100%;padding:8px 10px;font:inherit;font-size:16px;border:1px solid var(--bd);border-radius:2px;background:var(--bg);color:var(--fg)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:0 8px}
+.fields .full{grid-column:1/-1}
+button{padding:9px 16px;font:inherit;font-size:16px;border:1px solid var(--ac);border-radius:2px;background:var(--ac);color:var(--bg);font-weight:700;cursor:pointer}
+button.sub{background:transparent;color:var(--ac);font-weight:400}
 button:disabled{opacity:.5}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border:1px solid var(--bd);border-radius:999px;font-size:.9rem;font-weight:500;margin:0;cursor:pointer;user-select:none}
-.chip input{width:auto;margin:0}
-.chip.on{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 12%,transparent)}
-#status{min-height:1.4em;font-size:.9rem}
+.actions{display:flex;gap:8px;margin-top:12px}
+.actions #go{flex:1}
+.note{font-size:.8rem;color:var(--sub);margin:8px 0 0;line-height:1.6}
+#status{min-height:1.4em;font-size:.85rem;margin-top:6px}
 #status.err{color:#c0392b}
-.demo{background:color-mix(in srgb,var(--warn) 15%,transparent);border:1px solid var(--warn);color:var(--fg);border-radius:8px;padding:8px 10px;font-size:.85rem;margin-bottom:10px}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
-.stat{border:1px solid var(--bd);border-radius:10px;padding:8px 4px}
-.stat b{display:block;font-size:1.35rem;font-variant-numeric:tabular-nums}
-.stat span{font-size:.75rem;opacity:.8}
+.compact .note{display:none}
+.hidden{display:none!important}
+.demo{border:1px solid var(--warn);color:var(--warn);border-radius:2px;padding:4px 8px;font-size:.85rem;margin:0 0 12px}
+section{margin:0 0 28px}
+h2{font-size:1.05rem;margin:0 0 6px}
+h3{font-size:.85rem;font-weight:700;margin:0 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border:1px solid var(--bd);border-radius:2px;font-size:.9rem;margin:0;color:var(--fg);cursor:pointer;user-select:none}
+.chip input{width:auto;margin:0}
+.chip.on{border-color:var(--ac);color:var(--ac);font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);margin-top:14px;border-top:1px solid var(--fg)}
+.stat{padding:8px 0 0}
+.stat b{display:block;font-size:1.6rem;line-height:1.3;font-variant-numeric:tabular-nums}
+.stat span{font-size:.8rem;color:var(--sub)}
 .hot{color:var(--hot)}.cold{color:var(--cold)}
-.meta{font-size:.8rem;opacity:.8;margin-top:8px}
+.meta{font-size:.85rem;color:var(--sub);margin-top:8px}
 #chart svg{width:100%;height:auto;display:block}
 #chart text{fill:var(--fg);font-size:10px}
-.legend{font-size:.75rem;opacity:.85;display:flex;gap:12px;flex-wrap:wrap;margin-top:4px}
-.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:3px;vertical-align:-1px}
+.legend{font-size:.78rem;color:var(--sub);display:flex;gap:14px;flex-wrap:wrap;margin-top:4px}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:-1px}
 table{width:100%;border-collapse:collapse;font-size:.9rem;font-variant-numeric:tabular-nums}
-th,td{padding:6px 4px;border-bottom:1px solid var(--bd);text-align:right}
+th{font-weight:700;font-size:.8rem;color:var(--sub);border-bottom:1px solid var(--fg)}
+th,td{padding:4px 6px;border-bottom:1px solid var(--bd);text-align:right}
 th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
 tr.out td{opacity:.4}
-.note{font-size:.8rem;opacity:.75}
-footer{font-size:.8rem;opacity:.8;text-align:center;padding:8px 0 24px}
+footer{font-size:.78rem;color:var(--sub);padding:0 16px 24px;max-width:760px}
 footer a{color:var(--ac)}
-.hidden{display:none!important}
+@media (min-width:860px){
+ .app{display:grid;grid-template-columns:280px 1fr;align-items:start}
+ .side{position:sticky;top:0;height:100vh;overflow:auto;border-bottom:0;border-right:1px solid var(--bd);padding:20px 18px}
+ .side h1{font-size:1.4rem;margin-bottom:14px}
+ .compact .fields .full{grid-column:1/-1}
+ main{padding:24px 32px}
+ footer{grid-column:2;padding:0 32px 24px}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>例年の今日の気温</h1>
-
-<div class="card">
-  <label for="date">日付(月日)</label>
-  <input type="date" id="date">
-  <label for="place">地点</label>
-  <select id="place"></select>
-  <div id="custom" class="grid2 hidden">
-    <div><label for="lat">緯度</label><input id="lat" type="number" step="0.01" min="-90" max="90" inputmode="decimal"></div>
-    <div><label for="lon">経度</label><input id="lon" type="number" step="0.01" min="-180" max="180" inputmode="decimal"></div>
-  </div>
-  <div class="grid2">
+<div class="app" id="app">
+<aside class="side">
+  <h1>天気既報</h1>
+  <div class="fields">
+    <div class="full"><label for="date">日付</label><input type="date" id="date"></div>
+    <div class="full"><label for="place">地点</label><select id="place"></select></div>
+    <div id="custom" class="full fields hidden" style="grid-template-columns:1fr 1fr">
+      <div><label for="lat">緯度</label><input id="lat" type="number" step="0.01" min="-90" max="90" inputmode="decimal"></div>
+      <div><label for="lon">経度</label><input id="lon" type="number" step="0.01" min="-180" max="180" inputmode="decimal"></div>
+    </div>
     <div><label for="y1">開始年</label><input id="y1" type="number" inputmode="numeric"></div>
     <div><label for="y2">終了年</label><input id="y2" type="number" inputmode="numeric"></div>
   </div>
-  <p class="note">期間は 1940 年〜昨年まで。1年ごとに1回 API を呼ぶので、長い期間ほど時間がかかります(取得済みはこの端末に保存)。</p>
+  <p class="note">期間は 1940 年〜昨年。1年ごとに1回 API を呼ぶので、長い期間ほど時間がかかります(取得済みはこの端末に保存)。</p>
   <div class="actions">
-    <button id="go">表示する</button>
-    <button id="demoBtn" class="sub">見本データで表示</button>
+    <button id="go">表示</button>
+    <button id="demoBtn" class="sub">見本</button>
   </div>
   <div id="status" role="status"></div>
-</div>
+</aside>
 
+<main>
 <div id="result" class="hidden">
-  <div class="card">
-    <div id="demoNote" class="demo hidden">見本データ(作り物の数値)で表示しています。実際の気温ではありません。</div>
+  <section>
+    <div id="demoNote" class="demo hidden">見本データ(実際の気温ではありません)</div>
     <h2 id="title"></h2>
-    <label style="margin-top:0">天気で絞り込み(その日の天気が該当する年だけで平均)</label>
+    <h3>天気で絞り込み</h3>
     <div class="chips" id="filters"></div>
-    <div class="stats" style="margin-top:12px">
+    <div class="stats">
       <div class="stat"><b class="hot" id="avgMax">–</b><span>最高 平均</span></div>
       <div class="stat"><b id="avgMean">–</b><span>日平均 平均</span></div>
       <div class="stat"><b class="cold" id="avgMin">–</b><span>最低 平均</span></div>
     </div>
     <div class="meta" id="meta"></div>
-  </div>
+  </section>
 
-  <div class="card">
-    <h2>各年の気温</h2>
+  <section>
     <div id="chart"></div>
     <div class="legend">
       <span><i style="background:linear-gradient(var(--hot),var(--cold))"></i>最低〜最高</span>
       <span><i style="background:var(--mean);height:3px;vertical-align:3px"></i>日平均</span>
-      <span><i style="background:var(--off)"></i>絞り込み対象外</span>
-      <span>点線: 絞り込み後の日平均の平均</span>
+      <span><i style="background:var(--off)"></i>対象外</span>
+      <span>点線: 日平均の平均</span>
     </div>
-  </div>
+  </section>
 
-  <div class="card">
-    <h2>一覧</h2>
+  <section>
     <table>
       <thead><tr><th>年</th><th>天気</th><th>最高</th><th>最低</th><th>平均</th><th>降水</th></tr></thead>
       <tbody id="rows"></tbody>
     </table>
-    <p class="note">天気はその日の代表天気コード(Open-Meteo の daily weather_code。1日のうち最も悪い天気)を分類したものです。</p>
-  </div>
+  </section>
 </div>
+</main>
 
 <footer>
   <a href="https://open-meteo.com/" target="_blank" rel="noopener">Weather data by Open-Meteo.com</a>
-  (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>)・再解析データ ERA5 ほか(Copernicus / ECMWF)
+  (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>)・ERA5 ほか(Copernicus / ECMWF)
 </footer>
-</main>
+</div>
 
 <script>
 "use strict";
@@ -130,7 +140,7 @@ const PLACES = [
 // WMO weather code → 分類
 const CATS = [
   {id:"sun",  name:"晴れ",   icon:"☀️", codes:[0,1]},
-  {id:"cloud",name:"くもり", icon:"☁️", codes:[2,3,45,48]},
+  {id:"cloud",name:"くもり", codes:[2,3,45,48]},
   {id:"rain", name:"雨",     icon:"🌧️", codes:[51,53,55,56,57,61,63,65,66,67,80,81,82]},
   {id:"snow", name:"雪",     icon:"❄️", codes:[71,73,75,77,85,86]},
   {id:"storm",name:"雷雨",   icon:"⛈️", codes:[95,96,99]}
@@ -279,6 +289,7 @@ async function run(demo){
   }
   setStatus(failed.length ? `${failed.length} 年分を取得できませんでした(${failed[0].err})。取得できた年だけで表示しています。` : "");
   current = {q, demo, items:ok};
+  $("app").classList.add("compact");
   render();
 }
 
@@ -301,7 +312,7 @@ function buildFilters(){
     });
   };
   mk("all", "すべて");
-  CATS.forEach(c=>mk(c.id, `${c.icon} ${c.name}(${counts[c.id]||0})`));
+  CATS.forEach(c=>mk(c.id, `${c.name}(${counts[c.id]||0})`));
 }
 
 function passes(it){ if(active.size===0) return true; const c = catOf(it.v.code); return !!c && active.has(c.id); }
@@ -328,7 +339,7 @@ function render(){
   items.forEach(i=>{
     const c = catOf(i.v.code);
     const tr = document.createElement("tr"); if(!passes(i)) tr.className = "out";
-    tr.innerHTML = `<td>${i.year}${i.sub?"*":""}</td><td>${c?c.icon+" "+c.name:"–"}</td><td class="hot">${fmt(i.v.max)}</td><td class="cold">${fmt(i.v.min)}</td><td>${fmt(i.v.mean)}</td><td>${i.v.prcp==null?"–":i.v.prcp.toFixed(1)}</td>`;
+    tr.innerHTML = `<td>${i.year}${i.sub?"*":""}</td><td>${c?c.name:"–"}</td><td class="hot">${fmt(i.v.max)}</td><td class="cold">${fmt(i.v.min)}</td><td>${fmt(i.v.mean)}</td><td>${i.v.prcp==null?"–":i.v.prcp.toFixed(1)}</td>`;
     tb.append(tr);
   });
 }
