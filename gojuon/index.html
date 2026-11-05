@@ -2,254 +2,177 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>五十音のいろは</title>
 <style>
-:root{--bg:#f5f3ee;--fg:#1d1b18;--card:#fff;--bd:#d9d4c8;--ac:#b5452f;--ac2:#fbe9e4;--mute:#6f6a60}
-@media (prefers-color-scheme:dark){:root{--bg:#15140f;--fg:#ece8df;--card:#211f19;--bd:#3d3a31;--ac:#e07a5f;--ac2:#3a241e;--mute:#a59f92}}
+/* 同梱フォント(表と画面で使う字だけのサブセット。OFL、fonts/ 参照) */
+@font-face{font-family:"Klee One";src:url(fonts/KleeOne-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Klee One";src:url(fonts/KleeOne-600.woff2) format("woff2");font-weight:600 900;font-display:swap}
+@font-face{font-family:"Zen Old Mincho";src:url(fonts/ZenOldMincho-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Zen Old Mincho";src:url(fonts/ZenOldMincho-700.woff2) format("woff2");font-weight:600 900;font-display:swap}
+
+:root{
+ --bg:#f3f0e8;--fg:#211d17;--card:#fffdf8;--bd:#d6d0c2;--mute:#77705f;--ac:#a23b28;--ac-fg:#fff;--ac2:#f3e2db;
+ --r:3px;--kana:"Klee One","Hiragino Mincho ProN","Yu Mincho",serif;
+ --ui:"Klee One",system-ui,-apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;
+ --hh:49px;
+}
+@media (prefers-color-scheme:dark){:root{--bg:#15130f;--fg:#ebe6db;--card:#1f1c17;--bd:#3b372e;--mute:#a39c8c;--ac:#d9745d;--ac-fg:#1a110d;--ac2:#3b241d}}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif}
-main{max-width:980px;margin:0 auto;padding:12px 16px 40px}
-h1{font-size:1.25rem;margin:.2em 0 .5em;letter-spacing:.05em}
-h2{font-size:1rem;margin:0 0 .5em}
-nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
-@media (min-width:560px){nav{grid-template-columns:repeat(6,1fr)}}
-nav button{padding:9px 4px;white-space:nowrap;border:1px solid var(--bd);background:var(--card);color:var(--fg);border-radius:999px;font-size:14px;cursor:pointer}
-nav button[aria-selected=true]{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:700}
-.panel{display:none}.panel.on{display:block}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:12px}
-.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
-.btn{padding:9px 14px;font-size:14px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--fg);cursor:pointer}
-.btn.pri{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:700}
-.btn[aria-pressed=true]{background:var(--ac2);border-color:var(--ac);font-weight:700}
-.btn:disabled{opacity:.45;cursor:default}
-.note{font-size:.82rem;color:var(--mute)}
-.stat{font-size:.9rem;margin-left:auto}
-.grid2{display:grid;grid-template-columns:1fr;gap:10px 18px}
-@media (min-width:640px){.grid2{grid-template-columns:1fr 1fr}}
-.f label,.f .lab{display:block;font-size:.82rem;font-weight:700;margin-bottom:3px}
-.f select,.f input[type=number],.f input[type=text]{width:100%;padding:8px;font-size:16px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg)}
-.f input[type=range]{width:100%}
-.f input[type=color]{width:52px;height:34px;padding:0;border:1px solid var(--bd);border-radius:6px;background:none}
-.colors{display:flex;flex-wrap:wrap;gap:10px}
-.colors .f{display:flex;flex-direction:column;align-items:center;font-size:.78rem}
-.chk{display:flex;gap:6px;align-items:center;font-size:.9rem}
-.chk input{width:18px;height:18px}
-.seg{display:flex;flex-wrap:wrap;gap:6px}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 var(--ui)}
+button,select,input{font:inherit;color:inherit}
 
-/* ----- 表 ----- */
-.board{overflow-x:auto;padding:2px 0 6px}
-.sheet{background:var(--sheetbg,#fff);padding:var(--pad,10px);border-radius:8px;display:inline-block;min-width:100%}
-.tblwrap{margin:0 auto 14px;width:max-content}
+/* ----- ヘッダー ----- */
+header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:8px;padding:8px 16px;height:var(--hh);background:var(--bg);border-bottom:1px solid var(--bd)}
+header h1{margin:0 auto 0 0;font:600 20px/1.2 var(--kana);letter-spacing:.06em;white-space:nowrap}
+
+/* ----- 部品 ----- */
+select{appearance:none;-webkit-appearance:none;height:32px;padding:0 28px 0 10px;border:1px solid var(--bd);border-radius:var(--r);background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2377705f' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 10px center;cursor:pointer;font-size:15px;max-width:100%}
+select.main{font:600 16px var(--kana);height:34px}
+.ib{min-width:32px;height:32px;padding:0 9px;border:1px solid var(--bd);border-radius:var(--r);background:var(--card);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap}
+.ib.pri{background:var(--ac);border-color:var(--ac);color:var(--ac-fg);font-weight:700}
+.ib:disabled{opacity:.4;cursor:default}
+.ib svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.info{width:26px;min-width:26px;height:26px;padding:0;border-radius:50%;font:italic 700 13px/1 Georgia,serif}
+.num{font-variant-numeric:tabular-nums;color:var(--mute);white-space:nowrap}
+.step{display:inline-flex;align-items:center;border:1px solid var(--bd);border-radius:var(--r);background:var(--card);height:32px}
+.step button{border:0;background:none;width:30px;height:30px;cursor:pointer;font-size:16px}
+.step output{min-width:46px;text-align:center;font-variant-numeric:tabular-nums}
+.sp{flex:1}
+
+/* ----- 操作列と表 ----- */
+.tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 16px 0}
+.tools:empty{display:none}
+.stage{padding:10px 16px 24px}
+.board{overflow-x:auto}
+.sheet{background:var(--sheetbg,#fff);padding:12px;width:max-content;min-width:100%;border:1px solid var(--bd)}
+.tblwrap{margin:0 auto 16px;width:max-content}
 .tblwrap:last-child{margin-bottom:0}
-.ttl{font-size:.8rem;color:var(--tfg,#555);margin:0 0 4px;font-family:system-ui,sans-serif}
+.ttl{font:12px/1.4 var(--ui);color:var(--tfg);margin:0 0 4px}
 .tbl{border-collapse:collapse;font-family:var(--font);font-weight:var(--fw)}
 .tbl.sep{border-collapse:separate;border-spacing:var(--gap)}
 .c{width:var(--cell);min-width:var(--cell);max-width:var(--cell);height:var(--cell);padding:0;text-align:center;vertical-align:middle;font-size:var(--fs);line-height:1;color:var(--cfg);background:var(--cbg);
    border:var(--line) solid var(--lc);position:relative;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;white-space:nowrap;overflow:hidden}
 .c.two{font-size:min(var(--fs),calc(var(--cell)*.44));letter-spacing:-.04em}
 .c.fill{color:var(--fillc)}
-.c.lab{background:transparent;border:0;font-size:calc(var(--cell)*.32);color:var(--tfg);font-family:system-ui,sans-serif;font-weight:400}
+.c.lab{background:transparent;border:0;font-size:calc(var(--cell)*.3);color:var(--tfg);font-weight:400}
 .tap .c[data-id]{cursor:pointer}
 .c.on{background:var(--mark);color:var(--mark)}
 .c.sel{background:var(--selbg);box-shadow:inset 0 0 0 3px var(--selc)}
-.c .n{position:absolute;right:2px;top:2px;font:700 max(9px,calc(var(--cell)*.24))/1 system-ui,sans-serif;color:var(--cntc)}
+.c .n{position:absolute;right:3px;top:3px;font:700 max(9px,calc(var(--cell)*.22))/1 var(--ui);color:var(--cntc)}
 
-/* ----- ランダム ----- */
-#rres{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:60px;padding:8px 0}
-#rres span{min-width:1.4em;padding:.15em .25em;font-size:var(--rfs,44px);line-height:1.15;text-align:center;background:var(--card);border:1px solid var(--bd);border-radius:10px;font-family:var(--font)}
+/* 文字くじの結果 */
+#kres{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:4px 0 12px}
+#kres:empty{display:none}
+#kres span{min-width:1.3em;padding:.12em .2em;font:600 var(--kfs,44px)/1.15 var(--kana);text-align:center;background:var(--card);border:1px solid var(--bd);border-radius:var(--r)}
 
-/* ----- 札あそび ----- */
-.cards{display:flex;flex-wrap:wrap;gap:8px;min-height:74px;align-items:flex-start}
-.kc{width:52px;height:68px;border-radius:9px;border:2px solid #b9ad94;background:#fffaf0;color:#2a241a;font:700 30px/1 var(--font);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;box-shadow:0 2px 0 #b9ad94}
+/* ----- 設定: 表を上に固定 ----- */
+body.p-set .stage{position:sticky;top:var(--hh);z-index:10;background:var(--bg);border-bottom:1px solid var(--bd);padding-top:10px;padding-bottom:10px;max-height:46vh;overflow:auto}
+#settings{display:none;padding:6px 16px 40px;max-width:960px;margin:0 auto}
+body.p-set #settings{display:block}
+#settings h2{font:600 15px/1.3 var(--kana);margin:16px 0 4px;padding-bottom:4px;border-bottom:1px solid var(--bd)}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px 14px}
+.fld{display:flex;flex-direction:column;gap:3px;min-width:0}
+.fld>span{font-size:12px;color:var(--mute)}
+.fld select{width:100%}
+.fld>.step{align-self:flex-start}
+.fld .two{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.colors{display:flex;flex-wrap:wrap;gap:10px}
+.swl{display:flex;flex-direction:column;align-items:center;font-size:11px;color:var(--mute);gap:2px;position:relative;cursor:pointer}
+.swl .sw{width:34px;height:30px;border:1px solid var(--bd);border-radius:var(--r)}
+.swl input{position:absolute;top:0;left:0;width:34px;height:30px;opacity:0;cursor:pointer}
+input[type=text]{height:32px;padding:0 8px;font-size:16px;border:1px solid var(--bd);border-radius:var(--r);background:var(--card);width:100%}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+
+/* ----- ことば札 ----- */
+#game{display:none;max-width:760px;margin:0 auto;padding:12px 16px 40px}
+body.p-cards #game{display:block}
+body.p-cards .stage{display:none}
+.gbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+.gbar b{font:600 24px/1 var(--kana)}
+.cards{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
+.kc{width:54px;height:72px;border-radius:var(--r);border:1px solid #a89a7c;background:#fffaf0;color:#2a241a;font:600 32px/1 var(--kana);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;box-shadow:0 2px 0 #c9bc9f}
 .kc.w{border-color:var(--ac);box-shadow:0 2px 0 var(--ac)}
-.kc .alt{position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font:12px/1 system-ui;background:var(--card);border:1px solid var(--bd);color:var(--fg);border-radius:6px;padding:2px 5px}
-.wordrow{min-height:92px;padding:8px;border:2px dashed var(--bd);border-radius:10px;margin:6px 0 10px}
-#glog{margin:0;padding-left:1.2em;font-size:.92rem}
+.kc .alt{position:absolute;bottom:-12px;left:50%;transform:translateX(-50%);font:11px/1 var(--ui);background:var(--card);border:1px solid var(--bd);color:var(--fg);border-radius:var(--r);padding:2px 4px}
+.wordrow{min-height:96px;padding:10px;border:1px dashed var(--bd);background:var(--card);margin-bottom:10px}
+.wordrow:empty::before{content:"手札を押して並べる";color:var(--mute);font-size:13px}
+.gact{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.lbl{font-size:12px;color:var(--mute);margin:0 0 6px}
+#glog{margin:18px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+#glog li{font:600 16px/1 var(--kana);padding:6px 8px;background:var(--card);border:1px solid var(--bd);border-radius:var(--r)}
+#glog li small{font:11px var(--ui);color:var(--mute);margin-left:4px}
 
+/* ----- 説明(i) ----- */
+dialog{border:1px solid var(--bd);border-radius:var(--r);background:var(--card);color:var(--fg);max-width:min(460px,calc(100vw - 32px));padding:16px 18px}
+dialog::backdrop{background:rgba(0,0,0,.35)}
+dialog h2{margin:0 0 8px;font:600 18px/1.3 var(--kana)}
+dialog ul{margin:0;padding-left:1.2em}
+dialog li{margin:3px 0}
+dialog form{text-align:right;margin-top:12px}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:var(--r);z-index:50;font-size:13px}
+
+@media (max-width:480px){
+ header{padding:8px 10px}
+ header h1{font-size:17px;letter-spacing:.02em}
+ .tools{padding:8px 10px 0;gap:6px}
+ .stage{padding:8px 10px 20px}
+ #settings,#game{padding-left:10px;padding-right:10px}
+ .sheet{padding:6px}
+ .fgrid{grid-template-columns:1fr 1fr}
+}
 @media print{
  @page{margin:12mm}
  body{background:#fff}
- .noprint,nav,h1,.bar,.card.cfg{display:none!important}
- main{max-width:none;padding:0}
- .panel{display:none!important}
- .panel.on.printable{display:block!important}
- .card{border:0;padding:0;background:none}
+ header,.tools,#kres,#game,#settings,dialog,#toast{display:none!important}
+ .stage{padding:0!important;position:static!important;max-height:none!important;border:0!important}
  .board{overflow:visible}
- .sheet{border-radius:0}
+ .sheet{border:0}
  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
 </head>
 <body>
-<main>
-<h1>五十音のいろは</h1>
-<nav role="tablist" id="tabs">
- <button data-tab="view">表</button>
- <button data-tab="mark">塗る</button>
- <button data-tab="count">数える</button>
- <button data-tab="rand">ランダム</button>
- <button data-tab="game">札あそび</button>
- <button data-tab="set">設定</button>
-</nav>
+<header>
+ <h1>五十音のいろは</h1>
+ <select class="main" id="page" aria-label="ページ">
+  <option value="table">五十音表</option>
+  <option value="check">チェック表</option>
+  <option value="play">あそび</option>
+  <option value="set">設定</option>
+ </select>
+ <button class="ib info" id="infoBtn" aria-label="このページの説明">i</button>
+</header>
 
-<!-- 表 -->
-<section class="panel printable" id="p-view">
- <div class="bar">
-  <button class="btn" data-act="script">ひらがな ⇄ カタカナ</button>
-  <button class="btn" data-act="print">印刷</button>
-  <span class="note">構成・色・書体などは「設定」で変えられます。</span>
+<div class="tools" id="tools"></div>
+<div class="stage" id="stage">
+ <div id="kres" aria-live="polite"></div>
+ <div class="board" id="board"></div>
+</div>
+
+<section id="settings" aria-label="設定"></section>
+
+<section id="game" aria-label="ことば札">
+ <div class="gbar">
+  <b id="gscore">0</b><span class="num">点</span>
+  <span class="num">山札 <span id="gdeck">0</span></span>
+  <span class="num">手番 <span id="gturn">0</span></span>
+  <span class="sp"></span>
+  <button class="ib" id="gnew">新しく始める</button>
  </div>
- <div class="board" id="b-view"></div>
+ <div class="wordrow cards" id="gword"></div>
+ <div class="gact">
+  <button class="ib pri" id="gok">できた</button>
+  <button class="ib" id="gback">もどす</button>
+  <button class="ib" id="gswap">手札を取りかえる</button>
+ </div>
+ <p class="lbl">手札</p>
+ <div class="cards" id="ghand"></div>
+ <p class="lbl" id="gmsg" style="margin-top:10px"></p>
+ <ol id="glog"></ol>
 </section>
 
-<!-- 黒塗り -->
-<section class="panel printable" id="p-mark">
- <div class="bar">
-  <button class="btn" id="markClear">全部もどす</button>
-  <button class="btn" id="markAll">全部塗る</button>
-  <button class="btn" data-act="print">印刷</button>
-  <span class="stat" id="markStat"></span>
- </div>
- <p class="note noprint" style="margin:-4px 0 8px">マスを押すと塗りつぶし、もう一度押すと戻ります。</p>
- <div class="board" id="b-mark"></div>
-</section>
-
-<!-- カウント -->
-<section class="panel printable" id="p-count">
- <div class="bar">
-  <div class="seg" role="group" aria-label="押したときの動き">
-   <button class="btn" id="cntUp" aria-pressed="true">＋1 する</button>
-   <button class="btn" id="cntDown" aria-pressed="false">−1 する</button>
-  </div>
-  <button class="btn" id="cntReset">全部 0 にする</button>
-  <button class="btn" data-act="print">印刷</button>
-  <span class="stat" id="cntStat"></span>
- </div>
- <p class="note noprint" style="margin:-4px 0 8px">マスを押すたびに数が増えます(「−1 する」に切り替えると減ります)。多いマスほど色が濃くなります。</p>
- <div class="board" id="b-count"></div>
-</section>
-
-<!-- ランダム -->
-<section class="panel" id="p-rand">
- <div class="card">
-  <div class="grid2">
-   <div class="f"><span class="lab">どこから選ぶか</span>
-    <div class="seg">
-     <button class="btn" id="rsAll">表の全体から</button>
-     <button class="btn" id="rsPick">選んだ文字から</button>
-    </div>
-   </div>
-   <div class="f"><label for="rn">表示する数</label><input id="rn" type="number" min="1" max="500" inputmode="numeric"></div>
-   <label class="chk"><input type="checkbox" id="runiq"> 重複なし(同じ字は 1 回まで)</label>
-   <div class="f"><label for="rfs">表示の大きさ</label><input id="rfs" type="range" min="20" max="120"></div>
-  </div>
-  <div class="bar" style="margin:12px 0 0">
-   <button class="btn pri" id="rgo">表示する</button>
-   <span class="stat" id="rpool"></span>
-  </div>
- </div>
- <div id="rres" aria-live="polite"></div>
- <p class="note" id="rmsg" style="text-align:center"></p>
- <div class="card" id="rpickbox">
-  <h2>選ぶ文字(押して選ぶ・外す)</h2>
-  <div class="bar">
-   <button class="btn" id="rpAll">全部選ぶ</button>
-   <button class="btn" id="rpNone">全部外す</button>
-   <span class="stat" id="rpStat"></span>
-  </div>
-  <div class="board" id="b-pick"></div>
- </div>
-</section>
-
-<!-- 札あそび -->
-<section class="panel" id="p-game">
- <div class="card">
-  <div class="bar" style="margin:0">
-   <b>得点 <span id="gscore">0</span></b>
-   <span>山札 <span id="gdeck">0</span> 枚</span>
-   <span>手番 <span id="gturn">0</span></span>
-   <button class="btn" id="gnew" style="margin-left:auto">新しく始める</button>
-  </div>
- </div>
- <div class="card">
-  <h2>ことば(並べた札)</h2>
-  <div class="wordrow cards" id="gword"></div>
-  <div class="bar">
-   <button class="btn pri" id="gok">できた!</button>
-   <button class="btn" id="gback">全部もどす</button>
-   <button class="btn" id="gswap">手札を全部取りかえる</button>
-  </div>
-  <h2>手札(押すと ことば に並ぶ)</h2>
-  <div class="cards" id="ghand"></div>
-  <p class="note" id="gmsg"></p>
- </div>
- <div class="card">
-  <h2>できたことば</h2>
-  <ol id="glog"></ol>
- </div>
- <div class="card">
-  <h2>あそびかた(ひとり用)</h2>
-  <ul class="note" style="margin:0;padding-left:1.2em">
-   <li>手札の札を並べて、2 文字以上のことばを作って「できた!」。札 1 枚 = 1 点、5 枚以上で +3 点。</li>
-   <li>札の下の「゛゜小」で、濁点・半濁点・小さい字に読みかえられます(か→が、は→ぱ、や→ゃ など)。</li>
-   <li>ことばとして正しいかは自分で(みんなで遊ぶときは周りの人が)判定します。辞書は入っていません。</li>
-   <li>作れないときは「手札を全部取りかえる」(手番を 1 つ使う)。山札がなくなったら終わり。</li>
-  </ul>
-  <div class="grid2" style="margin-top:10px">
-   <div class="f"><label for="ghs">手札の枚数</label><input id="ghs" type="number" min="4" max="12"></div>
-   <div class="f"><label for="gcp">1 字あたりの札の枚数</label><input id="gcp" type="number" min="1" max="4"></div>
-   <div class="f"><label for="gxv">母音と「ん」の追加枚数</label><input id="gxv" type="number" min="0" max="4"></div>
-  </div>
-  <p class="note">枚数の変更は「新しく始める」から有効です。くわしいルール案(複数人)は DESIGN.md にあります。</p>
- </div>
-</section>
-
-<!-- 設定 -->
-<section class="panel printable" id="p-set">
- <div class="card cfg">
-  <h2>表の構成</h2>
-  <div class="grid2" id="layoutForm"></div>
-  <div class="bar" style="margin:10px 0 0"><button class="btn" id="resetLayout">構成を初期値に戻す</button></div>
- </div>
- <div class="card cfg">
-  <h2>デザイン</h2>
-  <div class="grid2">
-   <div class="f"><span class="lab">文字</span><div class="seg" data-seg="script">
-    <button class="btn" data-v="hira">ひらがな</button><button class="btn" data-v="kata">カタカナ</button></div></div>
-   <div class="f"><span class="lab">並び</span><div class="seg" data-seg="dir">
-    <button class="btn" data-v="tate-rtl">縦(右から)</button><button class="btn" data-v="tate-ltr">縦(左から)</button><button class="btn" data-v="yoko">横(行ごと)</button></div></div>
-   <div class="f"><label for="dfont">書体</label><select id="dfont">
-    <option value="gothic">ゴシック</option><option value="mincho">明朝</option><option value="maru">丸ゴシック</option><option value="kyoka">教科書体</option><option value="custom">その他(名前を入力)</option></select>
-    <input id="dcustom" type="text" placeholder="例: Noto Serif JP" style="margin-top:6px"></div>
-   <label class="chk"><input type="checkbox" id="dbold"> 太字</label>
-   <div class="f"><span class="lab">マスの大きさ</span><div class="seg" data-seg="cellMode">
-    <button class="btn" data-v="auto">画面幅に合わせる</button><button class="btn" data-v="fixed">指定する</button></div></div>
-   <div class="f"><label for="dcell">マスの大きさ <span id="dcellv"></span></label><input id="dcell" type="range" min="20" max="140"></div>
-   <div class="f"><label for="dfs">文字の大きさ(マスに対して) <span id="dfsv"></span></label><input id="dfs" type="range" min="25" max="95"></div>
-   <div class="f"><label for="dline">線の太さ <span id="dlinev"></span></label><input id="dline" type="range" min="0" max="6"></div>
-   <div class="f"><label for="dgap">マスの間隔 <span id="dgapv"></span></label><input id="dgap" type="range" min="0" max="16"></div>
-   <label class="chk"><input type="checkbox" id="dlabels"> 行・段の見出しを表示</label>
-  </div>
-  <div class="colors" style="margin-top:12px">
-   <div class="f"><input type="color" id="c-fg"><span>文字</span></div>
-   <div class="f"><input type="color" id="c-cbg"><span>マス</span></div>
-   <div class="f"><input type="color" id="c-lc"><span>線</span></div>
-   <div class="f"><input type="color" id="c-sheet"><span>台紙</span></div>
-   <div class="f"><input type="color" id="c-mark"><span>塗り</span></div>
-   <div class="f"><input type="color" id="c-cnt"><span>数の色</span></div>
-  </div>
-  <div class="bar" style="margin:12px 0 0">
-   <button class="btn" id="resetDesign">デザインを初期値に戻す</button>
-   <button class="btn" data-act="print">印刷</button>
-   <button class="btn" id="wipe" style="margin-left:auto">保存データを全部消す</button>
-  </div>
- </div>
- <p class="note noprint">見本:</p>
- <div class="board" id="b-set"></div>
-</section>
-</main>
+<dialog id="dlg"><div id="dlgBody"></div><form method="dialog"><button class="ib">閉じる</button></form></dialog>
 
 <script src="kana.js"></script>
 <script>
@@ -257,112 +180,156 @@ nav button[aria-selected=true]{background:var(--ac);border-color:var(--ac);color
 var G = window.Gojuon;
 var KEY = 'gojuon-iroha:v1';
 
-/* ---------- 既定値(設定で変えられる) ---------- */
+/* ---------- 既定値(すべて設定ページで変えられる) ---------- */
 var DESIGN_DEFAULTS = {
-  script: 'hira', dir: 'tate-rtl', font: 'gothic', customFont: '', bold: false,
-  cellMode: 'auto', cellPx: 56, charPct: 62, line: 1, gap: 0, labels: false,
-  fg: '#1d1b18', cbg: '#ffffff', lc: '#9a9488', sheet: '#ffffff', mark: '#141414', cnt: '#c2410c'
+  script: 'hira', dir: 'auto', font: 'klee', customFont: '', bold: false,
+  cellMode: 'auto', cellPx: 96, charPct: 64, line: 1, gap: 0, labels: false,
+  fg: '#211d17', cbg: '#ffffff', lc: '#a39c8c', sheet: '#ffffff', mark: '#141414', cnt: '#b4381f'
 };
 var FONTS = {
-  gothic: '"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic","Meiryo","IPAGothic",sans-serif',
-  mincho: '"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP","IPAMincho","MS Mincho",serif',
-  maru: '"Hiragino Maru Gothic ProN","Zen Maru Gothic","Kosugi Maru","M PLUS Rounded 1c","BIZ UDGothic",sans-serif',
-  kyoka: '"UD デジタル 教科書体 N-R","UD Digi Kyokasho N-R","UDDigiKyokashoN-R","YuKyokasho","Klee","Hiragino Mincho ProN",serif'
+  klee: '"Klee One","UD デジタル 教科書体 N-R","YuKyokasho",serif',
+  zom: '"Zen Old Mincho","Hiragino Mincho ProN","Yu Mincho",serif',
+  gothic: '"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic","Meiryo",sans-serif',
+  maru: '"Hiragino Maru Gothic ProN","Zen Maru Gothic","Kosugi Maru","M PLUS Rounded 1c",sans-serif'
 };
+var PALETTES = {
+  white: { name: '白', fg: '#211d17', cbg: '#ffffff', lc: '#a39c8c', sheet: '#ffffff', mark: '#141414', cnt: '#b4381f' },
+  kinari: { name: '生成り', fg: '#3a2c1c', cbg: '#fbf5e6', lc: '#b8a580', sheet: '#f1e8d2', mark: '#2e2418', cnt: '#a23b28' },
+  sumi: { name: '墨', fg: '#111111', cbg: '#ffffff', lc: '#111111', sheet: '#ffffff', mark: '#111111', cnt: '#d0021b' },
+  board: { name: '黒板', fg: '#f1efe4', cbg: '#23392f', lc: '#5f7d6d', sheet: '#1b2c24', mark: '#0a120e', cnt: '#f2c14e' },
+  ai: { name: '藍', fg: '#f5f1e8', cbg: '#1e2d4a', lc: '#50668f', sheet: '#16223a', mark: '#080d18', cnt: '#f0a35e' }
+};
+var COLOR_KEYS = ['fg', 'cbg', 'lc', 'sheet', 'mark', 'cnt'];
 
-var S = load();
+// ページと、その中の切り替え
+var PAGES = { table: '五十音表', check: 'チェック表', play: 'あそび', set: '設定' };
+var CHECKS = { mark: '黒塗り', count: 'カウント' };
+var PLAYS = { kuji: '文字くじ', cards: 'ことば札' };
+
+/* ---------- 状態と保存 ---------- */
 function fresh() {
   return {
-    tab: 'view',
+    page: 'table', check: 'mark', play: 'kuji',
     layout: Object.assign({}, G.DEFAULTS),
     design: Object.assign({}, DESIGN_DEFAULTS),
     marks: {}, counts: {}, cntDir: 1,
-    rnd: { src: 'all', n: 5, unique: true, fs: 48, picked: {}, last: [] },
+    rnd: { src: 'all', n: 5, unique: true, picked: {}, last: [] },
     game: { handSize: 7, copies: 2, extraVowel: 1, deck: [], hand: [], word: [], score: 0, turn: 0, log: [], started: false }
   };
 }
 function load() {
   var s = fresh();
   try {
-    var raw = localStorage.getItem(KEY);
-    if (raw) {
-      var d = JSON.parse(raw);
-      ['tab', 'marks', 'counts', 'cntDir'].forEach(function (k) { if (d[k] !== undefined) s[k] = d[k]; });
+    var d = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (d) {
+      ['page', 'check', 'play', 'marks', 'counts', 'cntDir'].forEach(function (k) { if (d[k] !== undefined) s[k] = d[k]; });
       ['layout', 'design', 'rnd', 'game'].forEach(function (k) { if (d[k]) Object.assign(s[k], d[k]); });
     }
   } catch (e) {}
+  if (!PAGES[s.page]) s.page = 'table';
+  if (!CHECKS[s.check]) s.check = 'mark';
+  if (!PLAYS[s.play]) s.play = 'kuji';
+  if (!FONTS[s.design.font] && s.design.font !== 'custom') s.design.font = 'klee';
   return s;
 }
-var saveT;
-function save() {
-  clearTimeout(saveT);
-  saveT = setTimeout(function () { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }, 150);
-}
+var S = load(), saveT;
+function save() { clearTimeout(saveT); saveT = setTimeout(flush, 150); }
+function flush() { clearTimeout(saveT); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+window.addEventListener('pagehide', flush);
+document.addEventListener('visibilitychange', function () { if (document.hidden) flush(); });
+
 function $(id) { return document.getElementById(id); }
 function disp(h) { return G.display(h, S.design.script); }
+function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function fontOf(d) {
+  return d.font === 'custom' && d.customFont ? '"' + d.customFont.replace(/["\\]/g, '') + '",' + FONTS.klee : (FONTS[d.font] || FONTS.klee);
+}
+function hex(c) { var n = parseInt(c.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+function mix(a, b, t) { var x = hex(a), y = hex(b); return 'rgb(' + x.map(function (v, i) { return Math.round(v + (y[i] - v) * t); }).join(',') + ')'; }
+
+/* ---------- 部品 ---------- */
+// opts: {value: label} か [[value, label], ...]。値は文字列で扱う
+function dropdown(opts, cur, fn, label) {
+  var s = el('select');
+  if (label) s.setAttribute('aria-label', label);
+  var list = Array.isArray(opts) ? opts : Object.keys(opts).map(function (k) { return [k, opts[k]]; });
+  list.forEach(function (o) { var op = el('option', null, o[1]); op.value = String(o[0]); s.appendChild(op); });
+  s.value = String(cur);
+  s.onchange = function () { var v = this.value; fn(v === 'true' ? true : v === 'false' ? false : v); };
+  return s;
+}
+function btn(label, fn, cls, aria) { var b = el('button', 'ib' + (cls ? ' ' + cls : '')); b.innerHTML = label; b.onclick = fn; if (aria) b.setAttribute('aria-label', aria); return b; }
+function stepper(val, unit, fn, lo, hi, st, label) {
+  var w = el('span', 'step'), o = el('output', null, val + unit);
+  var m = el('button', null, '−'), p = el('button', null, '+');
+  m.setAttribute('aria-label', (label || '') + 'を減らす'); p.setAttribute('aria-label', (label || '') + 'を増やす');
+  m.onclick = function () { fn(Math.max(lo, val - st)); }; p.onclick = function () { fn(Math.min(hi, val + st)); };
+  w.appendChild(m); w.appendChild(o); w.appendChild(p); return w;
+}
+var ICON_PRINT = '<svg viewBox="0 0 24 24"><path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z"/></svg>';
+var toastT;
+function toast(msg) {
+  var t = $('toast') || document.body.appendChild(Object.assign(el('div'), { id: 'toast' }));
+  t.textContent = msg; clearTimeout(toastT); toastT = setTimeout(function () { t.remove(); }, 2200);
+}
 
 /* ---------- 表の描画 ---------- */
 var built;
 function rebuild() { built = G.build(S.layout); }
 
-// 画面幅から自動のマス寸法を出す
-function cellSize(container, widthOverride) {
-  var d = S.design;
-  if (d.cellMode === 'fixed') return d.cellPx;
-  var maxCols = 1;
-  built.tables.forEach(function (t) {
-    var n = d.dir === 'yoko' ? t.dans.length : t.cols.length;
-    maxCols = Math.max(maxCols, n + (d.labels ? 1 : 0));
-  });
-  var w = (widthOverride || container.clientWidth || 340) - 20 - 4; // 台紙の余白
-  var per = Math.floor((w - (maxCols + 1) * d.gap) / maxCols - 2 * d.line);
-  return Math.max(20, Math.min(d.cellPx, per));
+// 並び「自動」: 縦長の狭い画面では横(行ごと)、それ以外と印刷では縦・右から
+function dirOf(printW) {
+  var v = S.design.dir;
+  if (v !== 'auto') return v;
+  return !printW && innerWidth < 600 && innerHeight > innerWidth ? 'yoko' : 'tate-rtl';
 }
-
-function applyVars(el, cell) {
-  var d = S.design;
-  var font = d.font === 'custom' && d.customFont ? '"' + d.customFont.replace(/"/g, '') + '",' + FONTS.gothic : (FONTS[d.font] || FONTS.gothic);
+// マスの寸法: 「画面に合わせる」なら使える幅と高さに収まる最大(上限 cellPx)
+function cellSize(board, d, printW) {
+  if (d.cellMode === 'fixed') return d.cellPx;
+  var L = d.labels ? 1 : 0, maxW = 1;
+  built.tables.forEach(function (t) { maxW = Math.max(maxW, (d.dir === 'yoko' ? t.dans.length : t.cols.length) + L); });
+  var m = built.tables[0], mainH = (d.dir === 'yoko' ? m.cols.length : m.dans.length) + L;
+  var w = (printW || board.clientWidth || 340) - (innerWidth <= 480 ? 12 : 24) - 4;
+  var per = Math.floor((w - (maxW + 1) * d.gap) / maxW - 2 * d.line);
+  if (!printW) {
+    var h;
+    if (S.page === 'set') h = innerHeight * .46 - 36;
+    else h = innerHeight - Math.min(board.getBoundingClientRect().top + scrollY, 260) - 40;
+    var perH = Math.floor((h - (mainH + 1) * d.gap) / mainH - 2 * d.line);
+    per = Math.min(per, Math.max(perH, S.page === 'set' ? 18 : 28));
+  }
+  return Math.max(16, Math.min(d.cellPx, per));
+}
+function applyVars(e, cell, d) {
   var v = {
     '--cell': cell + 'px', '--fs': Math.round(cell * d.charPct / 100) + 'px', '--gap': d.gap + 'px',
     '--line': d.line + 'px', '--lc': d.lc, '--cfg': d.fg, '--cbg': d.cbg, '--sheetbg': d.sheet,
-    '--mark': d.mark, '--cntc': d.cnt, '--font': font, '--fw': d.bold ? 700 : 400,
-    '--selbg': mix(d.cbg, '#f4c430', .45), '--selc': '#d39e00', '--tfg': mix(d.sheet, d.fg, .6), '--fillc': mix(d.cbg, d.fg, .25)
+    '--mark': d.mark, '--cntc': d.cnt, '--font': fontOf(d), '--fw': d.bold ? 700 : 400,
+    '--selbg': mix(d.cbg, '#f4c430', .45), '--selc': '#d39e00', '--tfg': mix(d.sheet, d.fg, .55), '--fillc': mix(d.cbg, d.fg, .22)
   };
-  for (var k in v) el.style.setProperty(k, v[k]);
-  document.documentElement.style.setProperty('--font', font);
+  for (var k in v) e.style.setProperty(k, v[k]);
 }
-
-function hex(c) { var n = parseInt(c.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
-function mix(a, b, t) {
-  var x = hex(a), y = hex(b);
-  return 'rgb(' + x.map(function (v, i) { return Math.round(v + (y[i] - v) * t); }).join(',') + ')';
+// いまのページで表を押したときの動き: view / mark / count / pick
+function boardMode() {
+  if (S.page === 'check') return S.check;
+  if (S.page === 'play' && S.play === 'kuji' && S.rnd.src === 'pick') return 'pick';
+  return 'view';
 }
-
-/**
- * mode: 'view' | 'mark' | 'count' | 'pick'
- */
-function renderBoard(container, mode, widthOverride) {
-  var d = S.design;
-  var cell = cellSize(container, widthOverride);
-  var sheet = document.createElement('div');
-  sheet.className = 'sheet' + (mode !== 'view' ? ' tap' : '');
-  applyVars(sheet, cell);
+function renderBoard(printW) {
+  var board = $('board'), d = Object.assign({}, S.design, { dir: dirOf(printW) }), mode = boardMode();
+  var cell = cellSize(board, d, printW);
+  var sheet = el('div', 'sheet' + (mode !== 'view' ? ' tap' : ''));
+  applyVars(sheet, cell, d);
   var maxCnt = 1;
   if (mode === 'count') for (var k in S.counts) maxCnt = Math.max(maxCnt, S.counts[k]);
 
   built.tables.forEach(function (t) {
-    var wrap = document.createElement('div');
-    wrap.className = 'tblwrap';
-    if (t.id !== 'main') {
-      var ttl = document.createElement('p'); ttl.className = 'ttl'; ttl.textContent = t.title; wrap.appendChild(ttl);
-    }
-    var grid = document.createElement('table');
-    grid.className = 'tbl' + (d.gap > 0 ? ' sep' : '');
+    var wrap = el('div', 'tblwrap');
+    if (t.id !== 'main') wrap.appendChild(el('p', 'ttl', t.title));
+    var tbl = el('table', 'tbl' + (d.gap > 0 ? ' sep' : ''));
     var nc = t.cols.length, nd = t.dans.length, L = d.labels ? 1 : 0;
-    var W, H;
-    if (d.dir === 'yoko') { W = nd + L; H = nc + L; } else { W = nc + L; H = nd + L; }
-    var M = [];
-    for (var yy = 0; yy < H; yy++) { M.push([]); for (var xx = 0; xx < W; xx++) M[yy].push(null); }
+    var W = (d.dir === 'yoko' ? nd : nc) + L, H = (d.dir === 'yoko' ? nc : nd) + L, M = [];
+    for (var y = 0; y < H; y++) { M.push([]); for (var x = 0; x < W; x++) M[y].push(null); }
     // 右から並べるときは段の見出しを右端に置く
     function pos(ci, di) {
       if (d.dir === 'yoko') return [di + L, ci + L];
@@ -370,215 +337,262 @@ function renderBoard(container, mode, widthOverride) {
       return [nc - 1 - ci, di + L];
     }
     if (L) {
-      M[0][d.dir === 'tate-rtl' ? nc : 0] = labEl('');
       t.cols.forEach(function (c, ci) {
-        var e = labEl(disp(c.label));
+        var e = lab(disp(c.label));
         if (d.dir === 'yoko') M[ci + 1][0] = e; else M[0][pos(ci, 0)[0]] = e;
       });
       t.dans.forEach(function (dn, di) {
-        var e = labEl(disp(G.DAN[dn]));
+        var e = lab(disp(G.DAN[dn]));
         if (d.dir === 'yoko') M[0][di + 1] = e; else M[di + 1][d.dir === 'tate-rtl' ? nc : 0] = e;
       });
     }
     t.cols.forEach(function (c, ci) {
       t.dans.forEach(function (dn, di) {
-        var x = c.cells[dn], e = document.createElement('td');
-        e.className = 'c';
-        if (!x) e.className += ' empty';
-        else if (x.filler) { e.className += ' fill'; e.textContent = disp(x.filler); }
+        var x = c.cells[dn], e = el('td', 'c');
+        if (!x) e.classList.add('empty');
+        else if (x.filler) { e.classList.add('fill'); e.textContent = disp(x.filler); }
         else {
-          var s = disp(x.h);
-          e.textContent = s;
-          e.dataset.id = x.id;
-          if (Array.from(s).length > 1) e.className += ' two';
-          if (mode === 'mark' && S.marks[x.id]) e.className += ' on';
-          if (mode === 'pick' && S.rnd.picked[x.id]) e.className += ' sel';
+          var s = disp(x.h), label = s;
+          e.textContent = s; e.dataset.id = x.id;
+          if (Array.from(s).length > 1) e.classList.add('two');
+          if (mode === 'mark' && S.marks[x.id]) { e.classList.add('on'); label += '(黒塗り)'; }
+          if (mode === 'pick' && S.rnd.picked[x.id]) { e.classList.add('sel'); label += '(選択中)'; }
           if (mode === 'count') {
             var n = S.counts[x.id] || 0;
-            if (n) {
-              var b = document.createElement('span'); b.className = 'n'; b.textContent = n; e.appendChild(b);
-              e.style.background = mix(d.cbg, d.cnt, .1 + .45 * n / maxCnt);
-            }
+            if (n) { e.appendChild(el('span', 'n', n)); e.style.background = mix(d.cbg, d.cnt, .1 + .45 * n / maxCnt); }
+            label += ' ' + n + '回';
           }
-          if (mode !== 'view') {
-            e.setAttribute('role', 'button'); e.tabIndex = 0;
-            e.setAttribute('aria-label', s + (mode === 'mark' && S.marks[x.id] ? '(塗り)' : '') +
-              (mode === 'count' ? ' ' + (S.counts[x.id] || 0) + '回' : '') + (mode === 'pick' && S.rnd.picked[x.id] ? '(選択中)' : ''));
-          }
+          if (mode !== 'view') { e.setAttribute('role', 'button'); e.tabIndex = 0; e.setAttribute('aria-label', label); }
         }
         var p = pos(ci, di); M[p[1]][p[0]] = e;
       });
     });
-    M.forEach(function (row) {
-      var tr = document.createElement('tr');
-      row.forEach(function (e) { tr.appendChild(e || labEl('')); });
-      grid.appendChild(tr);
-    });
-    wrap.appendChild(grid);
-    sheet.appendChild(wrap);
+    M.forEach(function (row) { var tr = el('tr'); row.forEach(function (e) { tr.appendChild(e || lab('')); }); tbl.appendChild(tr); });
+    wrap.appendChild(tbl); sheet.appendChild(wrap);
   });
-  container.innerHTML = '';
-  container.appendChild(sheet);
+  board.innerHTML = ''; board.appendChild(sheet);
 }
-function labEl(s) { var e = document.createElement('td'); e.className = 'c lab'; e.textContent = s; return e; }
+function lab(s) { return el('td', 'c lab', s); }
 
-/* ---------- タブ ---------- */
-function setTab(t) {
-  S.tab = t; save();
-  document.querySelectorAll('#tabs button').forEach(function (b) { b.setAttribute('aria-selected', b.dataset.tab === t); });
-  document.querySelectorAll('.panel').forEach(function (p) { p.classList.toggle('on', p.id === 'p-' + t); });
-  render();
-}
-$('tabs').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) setTab(b.dataset.tab); });
-
-function render(printWidth) {
+/* ---------- ページ ---------- */
+function render(printW) {
+  $('page').value = S.page;
+  var cards = S.page === 'play' && S.play === 'cards';
+  document.body.className = 'p-' + S.page + (cards ? ' p-cards' : '');
   rebuild();
-  var t = S.tab;
-  if (t === 'view') renderBoard($('b-view'), 'view', printWidth);
-  if (t === 'set') { renderBoard($('b-set'), 'view', printWidth); syncSettings(); }
-  if (t === 'mark') { renderBoard($('b-mark'), 'mark', printWidth); markStat(); }
-  if (t === 'count') { renderBoard($('b-count'), 'count', printWidth); cntStat(); }
-  if (t === 'rand') renderRand();
-  if (t === 'game') renderGame();
+  renderTools();
+  if (cards) { renderGame(); return; }
+  renderKres();
+  renderBoard(printW);
+  if (S.page === 'set') renderSettings();
+}
+$('page').onchange = function () { S.page = this.value; save(); scrollTo(0, 0); render(); };
+window.addEventListener('beforeprint', function () { if (!document.body.classList.contains('p-cards')) renderBoard(700); });
+window.addEventListener('afterprint', function () { render(); });
+var rT; window.addEventListener('resize', function () { clearTimeout(rT); rT = setTimeout(function () { if (!document.body.classList.contains('p-cards')) renderBoard(); }, 120); });
+
+// ページごとの操作列
+function renderTools() {
+  var c = $('tools'); c.innerHTML = '';
+  var all = G.cellsOf(built);
+  function common() {
+    c.appendChild(el('span', 'sp'));
+    c.appendChild(btn('<span style="font:600 15px var(--kana)">あ/ア</span>', function () { S.design.script = S.design.script === 'hira' ? 'kata' : 'hira'; save(); render(); }, null, 'ひらがな/カタカナを切り替え'));
+    c.appendChild(btn(ICON_PRINT, function () { window.print(); }, null, '印刷'));
+  }
+  if (S.page === 'table') { common(); return; }
+  if (S.page === 'set') return;
+  if (S.page === 'check') {
+    c.appendChild(dropdown(CHECKS, S.check, function (v) { S.check = v; save(); render(); }, 'チェック表の種類'));
+    if (S.check === 'mark') {
+      var n = all.filter(function (x) { return S.marks[x.id]; }).length;
+      c.appendChild(el('span', 'num', n + ' / ' + all.length));
+      c.appendChild(btn('全部塗る', function () { all.forEach(function (x) { S.marks[x.id] = true; }); save(); render(); }));
+      c.appendChild(btn('全部消す', function () { if (confirm('黒塗りを全部消しますか?')) { S.marks = {}; save(); render(); } }));
+    } else {
+      var tot = 0; all.forEach(function (x) { tot += S.counts[x.id] || 0; });
+      c.appendChild(dropdown([[1, '押すと +1'], [-1, '押すと −1']], S.cntDir, function (v) { S.cntDir = +v; save(); }, '押したときの増減'));
+      c.appendChild(el('span', 'num', '合計 ' + tot));
+      c.appendChild(btn('リセット', function () { if (confirm('カウントを全部 0 にしますか?')) { S.counts = {}; save(); render(); } }));
+    }
+    common(); return;
+  }
+  // あそび
+  c.appendChild(dropdown(PLAYS, S.play, function (v) { S.play = v; save(); render(); }, 'あそびの種類'));
+  if (S.play === 'kuji') {
+    var r = S.rnd;
+    c.appendChild(dropdown({ all: '表の全体から', pick: '選んだ字から' }, r.src, function (v) { r.src = v; save(); render(); }, '選ぶ範囲'));
+    c.appendChild(stepper(r.n, '個', function (v) { r.n = v; save(); renderTools(); }, 1, 99, 1, '個数'));
+    c.appendChild(dropdown([[true, '重複なし'], [false, '重複あり']], r.unique, function (v) { r.unique = v; save(); }, '重複'));
+    c.appendChild(btn('引く', draw, 'pri'));
+    if (r.src === 'pick') {
+      var np = all.filter(function (x) { return r.picked[x.id]; }).length;
+      c.appendChild(el('span', 'num', np + ' 字'));
+      c.appendChild(btn('全部選ぶ', function () { all.forEach(function (x) { r.picked[x.id] = true; }); save(); render(); }));
+      c.appendChild(btn('解除', function () { r.picked = {}; save(); render(); }));
+    }
+  }
 }
 
-/* 共通ボタン */
-document.addEventListener('click', function (e) {
-  var b = e.target.closest('[data-act]'); if (!b) return;
-  if (b.dataset.act === 'print') window.print();
-  if (b.dataset.act === 'script') { S.design.script = S.design.script === 'hira' ? 'kata' : 'hira'; save(); render(); }
+/* ---------- 表を押したとき ---------- */
+$('board').addEventListener('click', function (e) {
+  var c = e.target.closest('td[data-id]'); if (!c) return;
+  var id = c.dataset.id, mode = boardMode();
+  if (mode === 'mark') { if (S.marks[id]) delete S.marks[id]; else S.marks[id] = true; }
+  else if (mode === 'count') { var n = (S.counts[id] || 0) + S.cntDir; if (n <= 0) delete S.counts[id]; else S.counts[id] = n; }
+  else if (mode === 'pick') { if (S.rnd.picked[id]) delete S.rnd.picked[id]; else S.rnd.picked[id] = true; }
+  else return;
+  save(); renderTools(); renderBoard();
 });
-// 印刷時は A4 縦の幅(約 700px)で自動寸法を計算し直す
-window.addEventListener('beforeprint', function () { render(700); });
-window.addEventListener('afterprint', function () { render(); });
-var rT; window.addEventListener('resize', function () { clearTimeout(rT); rT = setTimeout(function () { if (S.tab !== 'game' && S.tab !== 'rand') render(); }, 120); });
-
-// キーボード: Enter / スペースでマスを押す
 document.addEventListener('keydown', function (e) {
   var c = e.target.closest && e.target.closest('td[data-id][role=button]');
   if (c && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); c.click(); }
 });
 
-/* ---------- 黒塗り ---------- */
-$('b-mark').addEventListener('click', function (e) {
-  var c = e.target.closest('[data-id]'); if (!c) return;
-  var id = c.dataset.id;
-  if (S.marks[id]) delete S.marks[id]; else S.marks[id] = true;
-  c.classList.toggle('on', !!S.marks[id]);
-  save(); markStat();
-});
-function markStat() {
-  var all = G.cellsOf(built), n = all.filter(function (c) { return S.marks[c.id]; }).length;
-  $('markStat').textContent = n + ' / ' + all.length + ' 塗り';
-}
-$('markClear').onclick = function () { if (confirm('塗りを全部もどしますか?')) { S.marks = {}; save(); render(); } };
-$('markAll').onclick = function () { G.cellsOf(built).forEach(function (c) { S.marks[c.id] = true; }); save(); render(); };
-
-/* ---------- カウント ---------- */
-$('b-count').addEventListener('click', function (e) {
-  var c = e.target.closest('[data-id]'); if (!c) return;
-  var id = c.dataset.id, n = (S.counts[id] || 0) + S.cntDir;
-  if (n <= 0) delete S.counts[id]; else S.counts[id] = n;
-  save(); render();
-});
-function setDir(v) { S.cntDir = v; save(); $('cntUp').setAttribute('aria-pressed', v > 0); $('cntDown').setAttribute('aria-pressed', v < 0); }
-$('cntUp').onclick = function () { setDir(1); };
-$('cntDown').onclick = function () { setDir(-1); };
-$('cntReset').onclick = function () { if (confirm('数を全部 0 にしますか?')) { S.counts = {}; save(); render(); } };
-function cntStat() {
-  setDir(S.cntDir);
-  var tot = 0; G.cellsOf(built).forEach(function (c) { tot += S.counts[c.id] || 0; });
-  $('cntStat').textContent = '合計 ' + tot + ' 回';
-}
-
-/* ---------- ランダム ---------- */
-function randPool() {
-  var all = G.cellsOf(built);
-  return S.rnd.src === 'pick' ? all.filter(function (c) { return S.rnd.picked[c.id]; }) : all;
-}
-function renderRand() {
-  var r = S.rnd;
-  $('rsAll').setAttribute('aria-pressed', r.src === 'all');
-  $('rsPick').setAttribute('aria-pressed', r.src === 'pick');
-  $('rn').value = r.n; $('runiq').checked = r.unique; $('rfs').value = r.fs;
-  $('rres').style.setProperty('--rfs', r.fs + 'px');
-  applyVars($('rres'), 40);
-  $('rpickbox').style.display = r.src === 'pick' ? '' : 'none';
-  if (r.src === 'pick') renderBoard($('b-pick'), 'pick');
-  var pool = randPool();
-  $('rpool').textContent = '対象 ' + pool.length + ' 字';
-  $('rpStat').textContent = G.cellsOf(built).filter(function (c) { return r.picked[c.id]; }).length + ' 字 選択中';
-  showRes();
-}
-function showRes() {
-  var box = $('rres'); box.innerHTML = '';
-  S.rnd.last.forEach(function (h) { var s = document.createElement('span'); s.textContent = disp(h); box.appendChild(s); });
-}
-$('rsAll').onclick = function () { S.rnd.src = 'all'; save(); renderRand(); };
-$('rsPick').onclick = function () { S.rnd.src = 'pick'; save(); renderRand(); };
-$('rn').onchange = function () { S.rnd.n = Math.max(1, Math.min(500, parseInt(this.value, 10) || 1)); save(); renderRand(); };
-$('runiq').onchange = function () { S.rnd.unique = this.checked; save(); };
-$('rfs').oninput = function () { S.rnd.fs = +this.value; $('rres').style.setProperty('--rfs', this.value + 'px'); save(); };
-$('rgo').onclick = function () {
-  var pool = randPool().map(function (c) { return c.h; }), r = S.rnd, msg = '';
-  if (!pool.length) msg = r.src === 'pick' ? '下の表で文字を選んでください。' : '表に文字がありません。';
-  else if (r.unique && r.n > pool.length) msg = '重複なしで選べるのは ' + pool.length + ' 字なので、' + pool.length + ' 個表示しました。';
+/* ---------- 文字くじ ---------- */
+function draw() {
+  var r = S.rnd, all = G.cellsOf(built);
+  var pool = (r.src === 'pick' ? all.filter(function (x) { return r.picked[x.id]; }) : all).map(function (x) { return x.h; });
+  if (!pool.length) { r.last = []; save(); renderKres(); toast('表で字を選んでください'); return; }
   r.last = G.sample(pool, r.n, { unique: r.unique });
-  $('rmsg').textContent = msg; save(); showRes();
-};
-$('b-pick').addEventListener('click', function (e) {
-  var c = e.target.closest('[data-id]'); if (!c) return;
-  var id = c.dataset.id;
-  if (S.rnd.picked[id]) delete S.rnd.picked[id]; else S.rnd.picked[id] = true;
-  save(); renderRand();
-});
-$('rpAll').onclick = function () { G.cellsOf(built).forEach(function (c) { S.rnd.picked[c.id] = true; }); save(); renderRand(); };
-$('rpNone').onclick = function () { S.rnd.picked = {}; save(); renderRand(); };
+  if (r.unique && r.n > pool.length) toast('重複なしでは ' + pool.length + ' 個まで');
+  save(); renderKres();
+}
+function renderKres() {
+  var box = $('kres'); box.innerHTML = '';
+  if (!(S.page === 'play' && S.play === 'kuji')) return;
+  var n = S.rnd.last.length;
+  box.style.setProperty('--kfs', (n <= 3 ? 72 : n <= 6 ? 56 : n <= 12 ? 44 : 32) + 'px');
+  S.rnd.last.forEach(function (h) { box.appendChild(el('span', null, disp(h))); });
+}
 
-/* ---------- 札あそび ---------- */
-// 手札は {h, v} の配列(v: 読みかえの番号)。word は手札の番号の並び
+/* ---------- 設定(表は上に固定して見ながら変える) ---------- */
+function fld(label, ...nodes) {
+  var f = el('div', 'fld'); f.appendChild(el('span', null, label));
+  nodes.forEach(function (n) { if (n && /^(SELECT|INPUT)$/.test(n.tagName) && !n.getAttribute('aria-label')) n.setAttribute('aria-label', label); });
+  if (nodes.length > 1) { var w = el('div', 'two'); nodes.forEach(function (n) { if (n) w.appendChild(n); }); f.appendChild(w); }
+  else f.appendChild(nodes[0]);
+  return f;
+}
+function setL(k) { return function (v) { S.layout[k] = v; save(); render(); }; }
+function setD(k) { return function (v) { S.design[k] = v; save(); render(); }; }
+function setDn(k) { return function (v) { S.design[k] = +v; save(); render(); }; }
+function paletteOf(d) {
+  for (var k in PALETTES) if (COLOR_KEYS.every(function (c) { return PALETTES[k][c] === d[c]; })) return k;
+  return 'custom';
+}
+function renderSettings() {
+  var s = $('settings'), L = S.layout, d = S.design, g = S.game, y = scrollY;
+  s.innerHTML = '';
+  function section(title) { s.appendChild(el('h2', null, title)); var grid = el('div', 'fgrid'); s.appendChild(grid); return grid; }
+
+  var a = section('表の構成');
+  a.appendChild(fld('「ん」の位置', dropdown({ 'col-top': 'わ行の次・上', 'col-mid': 'わ行の次・中', 'col-bottom': 'わ行の次・下', outside: '表の外', none: '入れない' }, L.n, setL('n'))));
+  a.appendChild(fld('ゐ・ゑ など古い字', dropdown({ none: 'なし', some: '一部(ゐ・ゑ)', all: '全部(+や行え・わ行う)' }, L.archaic, setL('archaic'))));
+  a.appendChild(fld('や行・わ行の空き', dropdown({ blank: '空欄', dup: 'い・う・え を薄く' }, L.gapFill, setL('gapFill'))));
+  G.GROUPS.forEach(function (gr) { a.appendChild(fld(gr.name, dropdown(G.PLACES, L[gr.key], setL(gr.key)))); });
+
+  var b = section('見た目');
+  b.appendChild(fld('文字', dropdown({ hira: 'ひらがな', kata: 'カタカナ' }, d.script, setD('script'))));
+  b.appendChild(fld('並び', dropdown({ auto: '自動', 'tate-rtl': '縦・右から', 'tate-ltr': '縦・左から', yoko: '横・行ごと' }, d.dir, setD('dir'))));
+  var cf = null;
+  if (d.font === 'custom') {
+    cf = el('input'); cf.type = 'text'; cf.placeholder = '書体名'; cf.value = d.customFont;
+    cf.onchange = function () { S.design.customFont = this.value; save(); render(); };
+  }
+  b.appendChild(fld('書体', dropdown({ klee: '教科書体', zom: '明朝', gothic: 'ゴシック(端末)', maru: '丸ゴシック(端末)', custom: '名前で指定' }, d.font, setD('font')), cf));
+  b.appendChild(fld('太さ', dropdown([[false, '標準'], [true, '太字']], d.bold, setD('bold'))));
+  b.appendChild(fld('見出し(行・段)', dropdown([[false, 'なし'], [true, 'あり']], d.labels, setD('labels'))));
+  b.appendChild(fld('マスの大きさ', dropdown({ auto: '画面に合わせる', fixed: '固定' }, d.cellMode, setD('cellMode')),
+    stepper(d.cellPx, 'px', setDn('cellPx'), 16, 160, 4, 'マスの大きさ')));
+  b.appendChild(fld('字の大きさ(マス比)', stepper(d.charPct, '%', setDn('charPct'), 25, 95, 4, '字の大きさ')));
+  b.appendChild(fld('線の太さ', stepper(d.line, 'px', setDn('line'), 0, 6, 1, '線の太さ')));
+  b.appendChild(fld('マスの間隔', stepper(d.gap, 'px', setDn('gap'), 0, 16, 2, 'マスの間隔')));
+  var pal = Object.keys(PALETTES).map(function (k) { return [k, PALETTES[k].name]; });
+  var pk = paletteOf(d); if (pk === 'custom') pal.push(['custom', 'カスタム']);
+  b.appendChild(fld('配色', dropdown(pal, pk, function (v) { if (PALETTES[v]) { COLOR_KEYS.forEach(function (c) { S.design[c] = PALETTES[v][c]; }); save(); render(); } })));
+  var cs = el('div', 'colors');
+  [['fg', '文字'], ['cbg', 'マス'], ['lc', '線'], ['sheet', '台紙'], ['mark', '黒塗り'], ['cnt', 'カウント']].forEach(function (p) {
+    var w = el('label', 'swl'), sw = el('span', 'sw'); sw.style.background = d[p[0]];
+    var inp = el('input'); inp.type = 'color'; inp.value = d[p[0]]; inp.setAttribute('aria-label', p[1] + 'の色');
+    inp.oninput = function () { S.design[p[0]] = this.value; sw.style.background = this.value; save(); renderBoard(); };
+    inp.onchange = function () { render(); };
+    w.appendChild(sw); w.appendChild(inp); w.appendChild(document.createTextNode(p[1])); cs.appendChild(w);
+  });
+  s.appendChild(el('div', 'lbl', '色を個別に')).style.margin = '10px 0 4px';
+  s.appendChild(cs);
+
+  var c = section('ことば札');
+  [['handSize', '手札の枚数', 4, 12], ['copies', '1 字あたりの札', 1, 4], ['extraVowel', '母音と「ん」の追加', 0, 4]].forEach(function (f) {
+    c.appendChild(fld(f[1], stepper(g[f[0]], '枚', function (v) { g[f[0]] = v; save(); renderSettings(); }, f[2], f[3], 1, f[1])));
+  });
+  s.appendChild(el('p', 'num', '札の枚数は「新しく始める」から有効。'));
+
+  var bt = el('div', 'btns');
+  bt.appendChild(btn('構成を初期に戻す', function () { S.layout = Object.assign({}, G.DEFAULTS); save(); render(); }));
+  bt.appendChild(btn('見た目を初期に戻す', function () { S.design = Object.assign({}, DESIGN_DEFAULTS); save(); render(); }));
+  bt.appendChild(btn(ICON_PRINT + '印刷', function () { window.print(); }));
+  bt.appendChild(btn('保存データを全部消す', function () {
+    if (!confirm('設定・黒塗り・カウント・あそびの記録を全部消しますか?')) return;
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    S = fresh(); S.page = 'set'; render();
+  }));
+  s.appendChild(bt);
+  scrollTo(0, y);
+}
+
+/* ---------- 説明(i) ---------- */
+var INFO = {
+  table: ['五十音表', ['構成と見た目は「設定」で変えられます(上に表を出したまま変更できます)。', '「あ/ア」でひらがな・カタカナ、印刷ボタンで表だけを印刷します。', '設定や記録はこの端末のブラウザに保存されます。']],
+  mark: ['チェック表 ― 黒塗り', ['マスを押すと黒く塗りつぶし、もう一度押すと戻ります。', '覚えた字を隠す、使った字を消す、などに。塗ったまま印刷できます。']],
+  count: ['チェック表 ― カウント', ['マスを押すたびに回数が増えます。「押すと −1」で減らせます。', '回数が多いマスほど色が濃くなります。']],
+  kuji: ['あそび ― 文字くじ', ['「引く」で表の字からランダムに選び、上に大きく出します。', '「選んだ字から」にすると、表で押した字だけが対象です。', '重複ありでは同じ字が何度も出ます。']],
+  cards: ['あそび ― ことば札', ['手札を押して並べ、2 字以上のことばができたら「できた」。札 1 枚 1 点、5 枚以上で +3 点。',
+    '並べた札の「゛゜小」で濁点・半濁点・小さい字に読みかえます(か→が、は→ぱ、や→ゃ)。並べた札を押すと手札に戻ります。',
+    'ことばかどうかは自分で(みんなで遊ぶなら周りの人が)判定します。', '作れないときは「手札を取りかえる」(手番を 1 つ使う)。札の枚数は「設定」で。']],
+  set: ['設定', ['上の表を見ながら変えられます。',
+    '並び「自動」は、縦長のスマホでは横・行ごと、広い画面と印刷では縦・右からにします。',
+    'マス「画面に合わせる」は収まる最大の大きさ(数字は上限)、「固定」はその大きさ。',
+    'ゐ・ゑ の「全部」は や行え・わ行う も入ります。拗音の ぎゃ・ぴゃ などは濁音・半濁音を入れたときに加わります。']]
+};
+$('infoBtn').onclick = function () {
+  var key = S.page === 'check' ? S.check : S.page === 'play' ? S.play : S.page, it = INFO[key], body = $('dlgBody');
+  body.innerHTML = ''; body.appendChild(el('h2', null, it[0]));
+  var ul = el('ul'); it[1].forEach(function (t) { ul.appendChild(el('li', null, t)); }); body.appendChild(ul);
+  $('dlg').showModal();
+};
+
+/* ---------- ことば札 ---------- */
 function newGame() {
   var g = S.game;
   g.deck = G.makeDeck(g.copies, g.extraVowel);
   g.hand = []; g.word = []; g.score = 0; g.turn = 1; g.log = []; g.started = true;
-  draw(); save(); renderGame();
+  refill(); save(); renderGame();
 }
-function draw() {
-  var g = S.game;
-  while (g.hand.length < g.handSize && g.deck.length) g.hand.push({ h: g.deck.pop(), v: 0 });
-}
-function readOf(card) { var vs = G.variants(card.h); return vs[card.v % vs.length]; }
+function refill() { var g = S.game; while (g.hand.length < g.handSize && g.deck.length) g.hand.push({ h: g.deck.pop(), v: 0 }); }
+function readOf(c) { var vs = G.variants(c.h); return vs[c.v % vs.length]; }
 function renderGame() {
   var g = S.game;
   if (!g.started) { newGame(); return; }
   $('gscore').textContent = g.score; $('gdeck').textContent = g.deck.length; $('gturn').textContent = g.turn;
-  $('ghs').value = g.handSize; $('gcp').value = g.copies; $('gxv').value = g.extraVowel;
   var hand = $('ghand'), word = $('gword'); hand.innerHTML = ''; word.innerHTML = '';
   g.hand.forEach(function (c, i) {
     if (g.word.indexOf(i) >= 0) return;
-    var b = document.createElement('button'); b.className = 'kc'; b.textContent = disp(c.h); b.dataset.i = i;
-    b.setAttribute('aria-label', disp(c.h) + 'の札'); hand.appendChild(b);
+    var b = el('button', 'kc', disp(c.h)); b.dataset.i = i; b.setAttribute('aria-label', disp(c.h) + 'の札'); hand.appendChild(b);
   });
   g.word.forEach(function (i, k) {
-    var c = g.hand[i], b = document.createElement('button'); b.className = 'kc w'; b.dataset.k = k;
-    b.textContent = disp(readOf(c)); b.setAttribute('aria-label', disp(readOf(c)) + '(押すと手札にもどす)');
-    if (G.variants(c.h).length > 1) {
-      var a = document.createElement('span'); a.className = 'alt'; a.textContent = '゛゜小'; a.dataset.alt = k; b.appendChild(a);
-    }
+    var c = g.hand[i], b = el('button', 'kc w', disp(readOf(c))); b.dataset.k = k;
+    b.setAttribute('aria-label', disp(readOf(c)) + '(押すと手札にもどす)');
+    if (G.variants(c.h).length > 1) { var a = el('span', 'alt', '゛゜小'); a.dataset.alt = k; b.appendChild(a); }
     word.appendChild(b);
   });
-  if (!g.word.length) word.innerHTML = '<span class="note">手札を押して並べます</span>';
   var log = $('glog'); log.innerHTML = '';
-  g.log.forEach(function (w) { var li = document.createElement('li'); li.textContent = disp(w.w) + '(' + w.p + ' 点)'; log.appendChild(li); });
+  g.log.forEach(function (w) { var li = el('li', null, disp(w.w)); li.appendChild(el('small', null, w.p)); log.appendChild(li); });
   $('gok').disabled = g.word.length < 2;
-  $('gmsg').textContent = !g.deck.length && !g.hand.length ? 'おしまい! 合計 ' + g.score + ' 点' :
-    !g.deck.length ? '山札がなくなりました。手札で作れるだけ作りましょう。' : '';
   $('gswap').disabled = !g.deck.length;
+  $('gmsg').textContent = !g.deck.length && !g.hand.length ? 'おしまい ' + g.score + ' 点' : !g.deck.length ? '山札がなくなりました' : '';
 }
-$('ghand').addEventListener('click', function (e) {
-  var b = e.target.closest('.kc'); if (!b) return;
-  S.game.word.push(+b.dataset.i); save(); renderGame();
-});
+$('ghand').addEventListener('click', function (e) { var b = e.target.closest('.kc'); if (!b) return; S.game.word.push(+b.dataset.i); save(); renderGame(); });
 $('gword').addEventListener('click', function (e) {
   var g = S.game, a = e.target.closest('[data-alt]');
   if (a) { var c = g.hand[g.word[+a.dataset.alt]]; c.v = (c.v + 1) % G.variants(c.h).length; save(); renderGame(); return; }
@@ -592,78 +606,17 @@ $('gok').onclick = function () {
   var p = g.word.length + (g.word.length >= 5 ? 3 : 0);
   g.log.push({ w: w, p: p }); g.score += p;
   g.hand = g.hand.filter(function (_, i) { return g.word.indexOf(i) < 0; });
-  g.word = []; g.turn++; draw(); save(); renderGame();
+  g.word = []; g.turn++; refill(); save(); renderGame();
 };
 $('gswap').onclick = function () {
   var g = S.game; if (!g.deck.length) return;
   var back = g.hand.map(function (c) { return c.h; });
-  g.hand = []; g.word = []; draw();
-  g.deck = G.shuffle(g.deck.concat(back)); g.turn++; save(); renderGame();
+  g.hand = []; g.word = []; refill(); g.deck = G.shuffle(g.deck.concat(back)); g.turn++; save(); renderGame();
 };
 $('gnew').onclick = function () { if (!S.game.log.length || confirm('今のゲームをやめて新しく始めますか?')) newGame(); };
-function gnum(id, key, lo, hi) { $(id).onchange = function () { S.game[key] = Math.max(lo, Math.min(hi, parseInt(this.value, 10) || lo)); save(); }; }
-gnum('ghs', 'handSize', 4, 12); gnum('gcp', 'copies', 1, 4); gnum('gxv', 'extraVowel', 0, 4);
 
-/* ---------- 設定 ---------- */
-(function buildLayoutForm() {
-  var f = $('layoutForm');
-  function sel(key, label, opts) {
-    var w = document.createElement('div'); w.className = 'f';
-    var l = document.createElement('label'); l.textContent = label; l.htmlFor = 'L-' + key;
-    var s = document.createElement('select'); s.id = 'L-' + key;
-    for (var v in opts) { var o = document.createElement('option'); o.value = v; o.textContent = opts[v]; s.appendChild(o); }
-    s.onchange = function () { S.layout[key] = this.value; save(); render(); };
-    w.appendChild(l); w.appendChild(s); f.appendChild(w);
-  }
-  sel('n', '「ん」の置き方', G.N_PLACES);
-  sel('archaic', '「ゐ」「ゑ」など古い字', G.ARCHAIC_LABEL);
-  sel('gapFill', 'や行・わ行の空きマス', { blank: '空欄にする', dup: 'い・う・え を薄く入れる' });
-  G.GROUPS.forEach(function (g) { sel(g.key, g.name, G.PLACES); });
-  var n = document.createElement('p'); n.className = 'note'; n.style.margin = '0';
-  n.textContent = '「全部」の や行え・わ行う は対応する書体がない端末では □ になります。拗音の濁音・半濁音(ぎゃ・ぴゃ など)は、濁音・半濁音を入れたときに加わります。';
-  f.appendChild(n);
-})();
-
-function syncSettings() {
-  var d = S.design;
-  for (var k in S.layout) { var el = $('L-' + k); if (el) el.value = S.layout[k]; }
-  document.querySelectorAll('[data-seg]').forEach(function (g) {
-    g.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', d[g.dataset.seg] === b.dataset.v); });
-  });
-  $('dfont').value = d.font; $('dcustom').value = d.customFont; $('dcustom').style.display = d.font === 'custom' ? '' : 'none';
-  $('dbold').checked = d.bold; $('dlabels').checked = d.labels;
-  $('dcell').value = d.cellPx; $('dcellv').textContent = d.cellPx + 'px' + (d.cellMode === 'auto' ? '(上限)' : '');
-  $('dfs').value = d.charPct; $('dfsv').textContent = d.charPct + '%';
-  $('dline').value = d.line; $('dlinev').textContent = d.line + 'px';
-  $('dgap').value = d.gap; $('dgapv').textContent = d.gap + 'px';
-  ['fg', 'cbg', 'lc', 'sheet', 'mark', 'cnt'].forEach(function (k) { $('c-' + k).value = d[k]; });
-}
-document.querySelectorAll('[data-seg]').forEach(function (g) {
-  g.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; S.design[g.dataset.seg] = b.dataset.v; save(); render(); });
-});
-function bindD(id, key, fn) {
-  var el = $(id);
-  el.addEventListener(el.type === 'checkbox' || el.tagName === 'SELECT' ? 'change' : 'input', function () {
-    S.design[key] = fn ? fn(el) : el.value; save(); render();
-  });
-}
-bindD('dfont', 'font'); bindD('dcustom', 'customFont');
-bindD('dbold', 'bold', function (e) { return e.checked; });
-bindD('dlabels', 'labels', function (e) { return e.checked; });
-bindD('dcell', 'cellPx', function (e) { return +e.value; });
-bindD('dfs', 'charPct', function (e) { return +e.value; });
-bindD('dline', 'line', function (e) { return +e.value; });
-bindD('dgap', 'gap', function (e) { return +e.value; });
-['fg', 'cbg', 'lc', 'sheet', 'mark', 'cnt'].forEach(function (k) { bindD('c-' + k, k); });
-$('resetLayout').onclick = function () { S.layout = Object.assign({}, G.DEFAULTS); save(); render(); };
-$('resetDesign').onclick = function () { S.design = Object.assign({}, DESIGN_DEFAULTS); save(); render(); };
-$('wipe').onclick = function () {
-  if (!confirm('設定・塗り・数・札あそびの記録を全部消しますか?')) return;
-  try { localStorage.removeItem(KEY); } catch (e) {}
-  S = fresh(); S.tab = 'set'; setTab('set');
-};
-
-setTab(S.tab);
+render();
+if (document.fonts) document.fonts.ready.then(function () { if (!document.body.classList.contains('p-cards')) renderBoard(); });
 </script>
 </body>
 </html>
