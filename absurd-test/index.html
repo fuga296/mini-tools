@@ -38,6 +38,18 @@ button.primary{background:var(--accent);border-color:var(--accent);color:#fff;fo
 .res-type{font-size:24px;font-weight:800;margin:4px 0 2px;line-height:1.4}
 .res-code{font-size:15px;color:var(--accent);font-weight:700}
 h2{font-size:15px;margin:0 0 8px;color:var(--accent)}
+.chart{display:block;width:100%;max-width:320px;margin:0 auto 6px}
+.chart .grid{fill:none;stroke:var(--line);stroke-width:1}
+.chart .axis{stroke:var(--line);stroke-width:1}
+.chart .area{fill:var(--accent);fill-opacity:.25;stroke:var(--accent);stroke-width:2}
+.chart .dot{fill:var(--accent)}
+.chart text{fill:var(--ink);font-size:11px;font-family:inherit}
+.bars{margin-top:14px}
+.bar2{margin:10px 0}
+.bar2 .lab{display:flex;justify-content:space-between;font-size:12px;color:var(--sub);margin-bottom:2px}
+.bar2 .tr{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-bottom:3px}
+.bar2 .tr i{display:block;height:100%;background:var(--accent)}
+.bar2 .tr.b i{opacity:.55}
 .metrics{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:14px}
 .metrics span:nth-child(even){font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
 ul{margin:0;padding-left:1.2em}
@@ -135,7 +147,10 @@ function buildResult(seed,quiz){
  var strengths=[both].concat(traits.slice(1,CONFIG.traitCount));
  var weak=shuffle(r,[both].concat(traits.slice(CONFIG.traitCount,CONFIG.traitCount*2-1)));
  var good=typeName(),bad=r()<.35?good:typeName(); // ときどき「相性の良い」と「悪い」が同じになる
+ var radar=pickN(r,D.METRICS,6).map(function(m){return {name:m,v:int(r,101)};});
+ var bars=pickN(r,D.PAIRS,3).map(function(p){return {a:p[0],b:p[1],va:int(r,101),vb:int(r,101)};});
  return {
+  radar:radar,bars:bars,
   intro:fill(pick(r,D.INTRO)),type:type,code:code.join("")+"-"+(1+int(r,9))+"型",codeMeaning:codeMeaning,
   rarity:fill(pick(r,D.RARITY)),
   metrics:pickN(r,D.METRICS,CONFIG.metricCount).map(function(m){return [m,fill(pick(r,D.METRIC_FORMATS))];}),
@@ -166,12 +181,23 @@ function next(){if(st.i<st.quiz.length-1){st.i++;renderQ();scrollTo(0,0);}else a
 function analyze(){show("analyzing");var msgs=["回答を分析しています","傾向を集計しています","タイプを判定しています"],k=0;
  $("anaText").textContent=msgs[0];var tm=setInterval(function(){k++;$("anaText").textContent=msgs[k%msgs.length];},Math.max(200,CONFIG.analyzeMs/msgs.length));
  setTimeout(function(){clearInterval(tm);renderResult();},CONFIG.analyzeMs);}
+function radarSvg(items){var S=320,c=S/2,R=100,n=items.length,svg='<svg class="chart" viewBox="0 0 '+S+' '+S+'" role="img" aria-label="レーダーチャート">';
+ function pt(i,k){var a=-Math.PI/2+2*Math.PI*i/n;return [c+R*k*Math.cos(a),c+R*k*Math.sin(a)];}
+ [.25,.5,.75,1].forEach(function(k){svg+='<polygon class="grid" points="'+items.map(function(_,i){return pt(i,k).map(function(x){return x.toFixed(1);}).join(",");}).join(" ")+'"/>';});
+ items.forEach(function(it,i){var e=pt(i,1),l=pt(i,1.2);svg+='<line class="axis" x1="'+c+'" y1="'+c+'" x2="'+e[0].toFixed(1)+'" y2="'+e[1].toFixed(1)+'"/>'+
+  '<text x="'+l[0].toFixed(1)+'" y="'+(l[1]+4).toFixed(1)+'" text-anchor="'+(Math.abs(l[0]-c)<8?"middle":l[0]>c?"start":"end")+'">'+esc(it.name)+'</text>';});
+ svg+='<polygon class="area" points="'+items.map(function(it,i){return pt(i,it.v/100).map(function(x){return x.toFixed(1);}).join(",");}).join(" ")+'"/>';
+ items.forEach(function(it,i){var q=pt(i,it.v/100);svg+='<circle class="dot" cx="'+q[0].toFixed(1)+'" cy="'+q[1].toFixed(1)+'" r="3"/>';});
+ return svg+'</svg>';}
+function barsHtml(a){return '<div class="bars">'+a.map(function(b){return '<div class="bar2"><div class="lab"><span>'+esc(b.a)+' '+b.va+'%</span><span>'+esc(b.b)+' '+b.vb+'%</span></div>'+
+ '<div class="tr"><i style="width:'+b.va+'%"></i></div><div class="tr b"><i style="width:'+b.vb+'%"></i></div></div>';}).join("")+'</div>';}
 function li(a){return a.map(function(x){return "<li>"+esc(x)+"</li>";}).join("");}
 function renderResult(){var R=buildResult(st.seed,st.quiz);var gs={},genres=[];st.quiz.forEach(function(q){if(!gs[q.genre]){gs[q.genre]=1;genres.push(q.genre);}});
  $("result").innerHTML=
  '<div class="card"><p class="res-sub">'+esc(R.intro)+'</p><p class="res-sub" style="margin-top:10px">あなたは</p>'+
  '<div class="res-type">「'+esc(R.type)+'」タイプ</div><div class="res-code">'+esc(R.code)+'</div>'+
  '<ul class="code-list">'+li(R.codeMeaning)+'</ul><p class="small" style="margin:8px 0 0">'+esc(R.rarity)+'</p></div>'+
+ '<div class="card"><h2>性格バランス</h2>'+radarSvg(R.radar)+barsHtml(R.bars)+'</div>'+
  '<div class="card"><h2>診断スコア</h2><div class="metrics">'+R.metrics.map(function(m){return "<span>"+esc(m[0])+"</span><span>"+esc(m[1])+"</span>";}).join("")+'</div></div>'+
  '<div class="card desc"><h2>あなたの性格</h2>'+R.desc.map(function(d){return "<p>"+esc(d)+"</p>";}).join("")+'</div>'+
  '<div class="card"><h2>長所</h2><ul>'+li(R.strengths)+'</ul><h2 style="margin-top:12px">短所</h2><ul>'+li(R.weak)+'</ul></div>'+
