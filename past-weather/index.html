@@ -139,11 +139,11 @@ const PLACES = [
 
 // WMO weather code → 分類
 const CATS = [
-  {id:"sun",  name:"晴れ",   icon:"☀️", codes:[0,1]},
+  {id:"sun",  name:"晴れ", codes:[0,1]},
   {id:"cloud",name:"くもり", codes:[2,3,45,48]},
-  {id:"rain", name:"雨",     icon:"🌧️", codes:[51,53,55,56,57,61,63,65,66,67,80,81,82]},
-  {id:"snow", name:"雪",     icon:"❄️", codes:[71,73,75,77,85,86]},
-  {id:"storm",name:"雷雨",   icon:"⛈️", codes:[95,96,99]}
+  {id:"rain", name:"雨", codes:[51,53,55,56,57,61,63,65,66,67,80,81,82]},
+  {id:"snow", name:"雪", codes:[71,73,75,77,85,86]},
+  {id:"storm",name:"雷雨", codes:[95,96,99]}
 ];
 function catOf(code){ if(code==null) return null; return CATS.find(c=>c.codes.includes(code)) || null; }
 
