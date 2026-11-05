@@ -110,6 +110,7 @@
   var DEFAULTS = {
     n: 'col-top',
     archaic: 'none',
+    wo: 'yes',          // 'yes' 「を」を入れる / 'no' 入れない
     gapFill: 'blank',   // 'blank' 空欄 / 'dup' あ行の字を薄く表示
     dakuon: 'none', handakuon: 'none', vu: 'none', small: 'none', youon: 'none'
   };
@@ -164,6 +165,7 @@
         });
       });
     }
+    if (o.wo === 'no') byId.w.cells[4] = null;
     var tables = [];
     var nPos = { 'col-top': 0, 'col-mid': 2, 'col-bottom': 4 }[o.n];
     if (nPos !== undefined) {

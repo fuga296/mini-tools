@@ -488,6 +488,7 @@ function renderSettings() {
 
   var a = section('表の構成');
   a.appendChild(fld('「ん」の位置', dropdown({ 'col-top': 'わ行の次・上', 'col-mid': 'わ行の次・中', 'col-bottom': 'わ行の次・下', outside: '表の外', none: '入れない' }, L.n, setL('n'))));
+  a.appendChild(fld('「を」', dropdown({ yes: '入れる', no: '入れない' }, L.wo, setL('wo'))));
   a.appendChild(fld('ゐ・ゑ など古い字', dropdown({ none: 'なし', some: '一部(ゐ・ゑ)', all: '全部(+や行え・わ行う)' }, L.archaic, setL('archaic'))));
   a.appendChild(fld('や行・わ行の空き', dropdown({ blank: '空欄', dup: 'い・う・え を薄く' }, L.gapFill, setL('gapFill'))));
   G.GROUPS.forEach(function (gr) { a.appendChild(fld(gr.name, dropdown(G.PLACES, L[gr.key], setL(gr.key)))); });
