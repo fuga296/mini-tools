@@ -15,6 +15,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 .row button{border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.25);color:#fff;border-radius:999px;padding:8px 16px;font-size:14px}
 .row button[aria-pressed=true]{background:#fff;color:#111;font-weight:700}
+#chain{font-size:13px}
 .sw{width:34px;height:34px;padding:0!important;border-radius:50%!important;border:2px solid rgba(255,255,255,.5)!important}
 .sw[aria-pressed=true]{border:3px solid #fff!important;box-shadow:0 0 0 2px rgba(0,0,0,.5)}
 #tgl{position:fixed;right:10px;bottom:calc(env(safe-area-inset-bottom) + 6px);display:none;border:0;background:rgba(0,0,0,.4);color:#fff;border-radius:999px;padding:8px 14px;font-size:13px}
@@ -31,16 +32,18 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
   <button data-p="43200000" type="button">12時間</button>
  </div>
  <div class="row" id="colors" role="group" aria-label="液体の色"></div>
+ <div class="row"><button id="chain" type="button" aria-pressed="false">満杯になったら次の色が上がる</button></div>
  <div class="row"><button id="hide" type="button" style="font-size:12px;padding:5px 14px">設定を隠す</button></div>
 </div>
 <button id="tgl" type="button">設定</button>
 <script>
 "use strict";
 var COLORS=[["青","#2f7bff"],["水色","#22d3ee"],["緑","#22c55e"],["紫","#a855f7"],["赤","#ef4444"],["橙","#f59e0b"],["桃","#ec4899"]];
-var st={p:60000,c:0};
+var st={p:60000,c:0,m:false};
 try{var s=JSON.parse(localStorage.getItem("liquid-clock")||"{}");
  if([60000,3600000,43200000].indexOf(s.p)>=0)st.p=s.p;
- if(s.c>=0&&s.c<COLORS.length)st.c=s.c|0;}catch(e){}
+ if(s.c>=0&&s.c<COLORS.length)st.c=s.c|0;
+ st.m=s.m===true;}catch(e){}
 function save(){try{localStorage.setItem("liquid-clock",JSON.stringify(st));}catch(e){}}
 var $=function(i){return document.getElementById(i);};
 var cv=$("cv"),g=cv.getContext("2d"),W=0,H=0,dpr=1;
@@ -79,12 +82,17 @@ function draw(){
  g.fillStyle=bg;g.fillRect(0,0,W,H);
  g.font=fnt;g.textAlign="center";g.textBaseline="alphabetic";
  // 空の容器(うっすら + 輪郭)
- g.fillStyle="rgba(255,255,255,0.07)";g.fillText(txt,W/2,y1);
+ var n=COLORS.length,idx=Math.floor((now-d.getTimezoneOffset()*60000)/st.p),ci=st.m?((st.c+idx)%n+n)%n:st.c;
+ // 連続モード: 前の周期の色が容器いっぱいにあり、その上に次の色が上がってくる
+ if(st.m){var pc=COLORS[(ci+n-1)%n][1],pg=g.createLinearGradient(0,top,0,bot);
+  pg.addColorStop(0,shade(pc,0));pg.addColorStop(1,shade(pc,-0.25));g.fillStyle=pg;}
+ else g.fillStyle="rgba(255,255,255,0.07)";
+ g.fillText(txt,W/2,y1);
  g.lineWidth=2;g.strokeStyle="rgba(255,255,255,0.55)";g.strokeText(txt,W/2,y1);
  // 液体を offscreen に描き、最後に文字の形で切り抜く(destination-in)
  og.setTransform(dpr,0,0,dpr,0,0);og.globalCompositeOperation="source-over";og.clearRect(0,0,W,H);
  var amp=Math.min(size*0.06,10),base=top-amp*2+(bot-top+amp*4)*(1-f);
- var base0=COLORS[st.c][1];
+ var base0=COLORS[ci][1];
  var layers=[{a:amp*0.7,k:0.03,sp:0.7,ph:1.3,k0:0.25,al:0.55},
              {a:amp*0.85,k:0.04,sp:-0.9,ph:3.1,k0:0.1,al:0.75},
              {a:amp,k:0.035,sp:0.6,ph:0,k0:0,al:1}];
@@ -111,12 +119,14 @@ function draw(){
 
 function ui(){
  [].forEach.call($("periods").children,function(b){b.setAttribute("aria-pressed",String(+b.dataset.p===st.p));});
+ $("chain").setAttribute("aria-pressed",String(st.m));
  [].forEach.call($("colors").children,function(b){b.setAttribute("aria-pressed",String(+b.dataset.i===st.c));});
 }
 COLORS.forEach(function(c,i){var b=document.createElement("button");b.type="button";b.className="sw";b.dataset.i=i;
  b.style.background=c[1];b.setAttribute("aria-label",c[0]);$("colors").appendChild(b);});
 $("periods").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.p=+b.dataset.p;save();ui();});
 $("colors").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;st.c=+b.dataset.i;save();ui();});
+$("chain").addEventListener("click",function(){st.m=!st.m;save();ui();});
 $("hide").addEventListener("click",function(){$("panel").classList.add("hide");});
 $("tgl").addEventListener("click",function(){$("panel").classList.remove("hide");});
 ui();draw();
