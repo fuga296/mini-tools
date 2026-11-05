@@ -7,26 +7,23 @@
 <title>究極の性格診断</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{--bg:#f6f1e7;--card:#fffdf8;--ink:#2a2622;--sub:#7a7066;--accent:#c2410c;--line:#e4dccd;--chip:#f1e9da}
+:root{--bg:#f6f1e7;--card:#fffdf8;--ink:#2a2622;--sub:#7a7066;--accent:#c2410c;--line:#e4dccd;--chip:#f1e9da;--r:4px}
 @media (prefers-color-scheme:dark){:root{--bg:#1b1916;--card:#25221e;--ink:#eee8de;--sub:#a59a8c;--accent:#fb923c;--line:#3a352f;--chip:#2f2b26}}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",Meiryo,"Noto Sans JP",sans-serif;line-height:1.7}
 main{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 32px)}
 h1{font-size:30px;margin:0 0 40px;letter-spacing:.08em;text-align:center}
-.start{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:none;border:0}
+.start{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .start .primary{max-width:320px}
 .link{background:none;border:0;color:var(--sub);font-size:12px;margin-top:28px;padding:6px 10px;text-decoration:underline}
 .seedbox{display:flex;gap:8px;margin-top:8px;width:100%;max-width:320px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 16px;margin:12px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 16px;margin:12px 0}
 .hidden{display:none!important}
-label{font-size:13px;color:var(--sub)}
-.seedrow{display:flex;gap:8px;margin-top:6px}
-input[type=text]{flex:1;min-width:0;font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);}
-button{font:inherit;font-size:15px;border-radius:10px;border:1px solid var(--line);background:var(--chip);color:var(--ink);padding:10px 14px;cursor:pointer}
-button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700;width:100%;padding:14px;font-size:17px;margin-top:14px}
-.meta{font-size:12px;color:var(--sub);display:flex;justify-content:space-between;gap:8px}
-.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:8px 0 14px}
+input[type=text]{flex:1;min-width:0;font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--bg);color:var(--ink);font-family:inherit}
+button{font:inherit;font-size:15px;border-radius:var(--r);border:1px solid var(--line);background:var(--chip);color:var(--ink);padding:10px 14px;cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700;width:100%;padding:14px;font-size:17px}
+.meta{font-size:12px;color:var(--sub)}
+.bar{height:4px;background:var(--line);margin:8px 0 14px}
 .bar i{display:block;height:100%;background:var(--accent);transition:width .25s}
-.src{display:inline-block;font-size:11px;background:var(--chip);border-radius:999px;padding:2px 10px;color:var(--sub)}
 .q{font-size:18px;font-weight:700;margin:10px 0 14px;line-height:1.6}
 .opts{display:flex;flex-direction:column;gap:8px}
 .opts button{text-align:left;background:var(--bg);padding:13px 14px}
@@ -34,34 +31,38 @@ button.primary{background:var(--accent);border-color:var(--accent);color:#fff;fo
 .back{margin-top:12px;font-size:13px;background:none;border:0;color:var(--sub);padding:4px 0}
 .spin{text-align:center;padding:40px 0}
 .spin .dots{font-size:28px;letter-spacing:.3em;color:var(--accent)}
+.sharebar{background:var(--accent);color:#fff;border-radius:var(--r);padding:12px;margin:0 0 12px;display:flex;align-items:center;gap:10px}
+.sharebar span{font-size:13px;flex:1;line-height:1.4}
+.sharebar button{background:#fff;color:#7c2d12;border:0;font-weight:700;padding:9px 14px;font-size:14px}
 .res-sub{font-size:13px;color:var(--sub);margin:0}
-.res-type{font-size:24px;font-weight:800;margin:4px 0 2px;line-height:1.4}
+.typebox{overflow:hidden;margin:2px 0}
+.res-type{font-size:26px;font-weight:800;line-height:1.4;white-space:nowrap;display:inline-block}
+.res-catch{font-size:14px;color:var(--sub);margin:0 0 6px}
 .res-code{font-size:15px;color:var(--accent);font-weight:700}
 h2{font-size:15px;margin:0 0 8px;color:var(--accent)}
-.chart{display:block;width:100%;max-width:320px;margin:0 auto 6px}
-.chart .grid{fill:none;stroke:var(--line);stroke-width:1}
-.chart .axis{stroke:var(--line);stroke-width:1}
-.chart .area{fill:var(--accent);fill-opacity:.25;stroke:var(--accent);stroke-width:2}
-.chart .dot{fill:var(--accent)}
-.chart text{fill:var(--ink);font-size:11px;font-family:inherit}
-.bars{margin-top:14px}
-.bar2{margin:10px 0}
-.bar2 .lab{display:flex;justify-content:space-between;font-size:12px;color:var(--sub);margin-bottom:2px}
-.bar2 .tr{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-bottom:3px}
-.bar2 .tr i{display:block;height:100%;background:var(--accent)}
-.bar2 .tr.b i{opacity:.55}
+h2.sp{margin-top:14px}
 .metrics{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:14px}
 .metrics span:nth-child(even){font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
 ul{margin:0;padding-left:1.2em}
 .code-list{font-size:13px;margin:6px 0 0}
 .desc p{margin:0 0 8px}
 .small{font-size:12px;color:var(--sub)}
-.foot{margin-top:14px;font-size:12px;color:var(--sub)}
+.chart{display:block;width:100%;max-width:480px;margin:0 auto 6px}
+.chart .grid{fill:none;stroke:var(--line);stroke-width:1}
+.chart .axis{stroke:var(--line);stroke-width:1}
+.chart .area{fill:var(--accent);fill-opacity:.25;stroke:var(--accent);stroke-width:2}
+.chart .dot{fill:var(--accent)}
+.chart text{fill:var(--ink);font-size:17px;font-family:inherit}
+.bars{margin-top:14px}
+.bar2{margin:10px 0}
+.bar2 .lab{display:flex;justify-content:space-between;font-size:12px;color:var(--sub);margin-bottom:2px}
+.bar2 .tr{height:8px;background:var(--line);margin-bottom:3px}
+.bar2 .tr i{display:block;height:100%;background:var(--accent)}
+.bar2 .tr.b i{opacity:.55}
+.foot{font-size:12px;color:var(--sub)}
 .foot summary{cursor:pointer}
 .foot p{margin:8px 0}
-.share{display:flex;gap:8px;flex-wrap:wrap}
-.share button{flex:1}
-.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 20px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 20px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:var(--r);font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
 </style>
 </head>
@@ -78,7 +79,7 @@ ul{margin:0;padding-left:1.2em}
  </section>
 
  <section id="quiz" class="card hidden">
-  <div class="meta"><span id="qnum"></span></div>
+  <div class="meta" id="qnum"></div>
   <div class="bar"><i id="prog"></i></div>
   <div class="q" id="qtext"></div>
   <div class="opts" id="opts"></div>
@@ -86,7 +87,7 @@ ul{margin:0;padding-left:1.2em}
  </section>
 
  <section id="analyzing" class="card hidden">
-  <div class="spin"><div class="dots" id="dots">・・・</div><p id="anaText">回答を分析しています</p></div>
+  <div class="spin"><div class="dots">・・・</div><p id="anaText">回答を分析しています</p></div>
  </section>
 
  <section id="result" class="hidden"></section>
@@ -103,6 +104,7 @@ var CONFIG={
  metricCount:6,      // スコア項目の数
  traitCount:3,       // 長所・短所の数(1つは両方に重複させる)
  jobCount:3,         // 向いている職業の数
+ hobbyCount:3,       // 向いている趣味の数
  seedLength:8,       // 自動で作るシードの文字数
  maxPerGenre:3       // 1ジャンルから選ぶ設問の上限(ごちゃまぜ度を保つ)
 };
@@ -118,7 +120,7 @@ function pick(r,a){return a[int(r,a.length)];}
 function shuffle(r,a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=int(r,i+1),t=a[i];a[i]=a[j];a[j]=t;}return a;}
 function pickN(r,a,n){return shuffle(r,a).slice(0,Math.min(n,a.length));}
 function newSeed(){var c="abcdefghjkmnpqrstuvwxyz23456789",s="";var u=new Uint32Array(CONFIG.seedLength);
- (window.crypto&&crypto.getRandomValues)?crypto.getRandomValues(u):u.forEach(function(_,i){u[i]=Math.random()*1e9;});
+ if(window.crypto&&crypto.getRandomValues)crypto.getRandomValues(u);else for(var k=0;k<u.length;k++)u[k]=Math.random()*1e9;
  for(var i=0;i<u.length;i++)s+=c[u[i]%c.length];return s;}
 
 // ===== 設問の組み立て(シードだけで決まる) =====
@@ -132,9 +134,9 @@ function buildQuiz(seed){
   return {genre:q.g,text:p[0],opts:p.length>1?p.slice(1):pick(r,D.CHOICE_SETS)};});
 }
 
-// ===== 結果の組み立て(シードだけで決まる。回答は使わない) =====
-function buildResult(seed,quiz){
- var r=makeRng("r|"+seed);
+// ===== 結果の組み立て(シードと回答で決まる) =====
+function buildResult(seed,quiz,ans){
+ var r=makeRng("r|"+seed+"|"+ans.join(""));
  function n(){return 1+int(r,99);}
  function typeName(){return pick(r,D.TYPE_ADJ)+pick(r,D.TYPE_NOUN);}
  var type=typeName();
@@ -146,81 +148,100 @@ function buildResult(seed,quiz){
  var traits=pickN(r,D.TRAITS,CONFIG.traitCount*2),both=traits[0];
  var strengths=[both].concat(traits.slice(1,CONFIG.traitCount));
  var weak=shuffle(r,[both].concat(traits.slice(CONFIG.traitCount,CONFIG.traitCount*2-1)));
- var good=typeName(),bad=r()<.35?good:typeName(); // ときどき「相性の良い」と「悪い」が同じになる
- var radar=pickN(r,D.METRICS,6).map(function(m){return {name:m,v:int(r,101)};});
- var bars=pickN(r,D.PAIRS,3).map(function(p){return {a:p[0],b:p[1],va:int(r,101),vb:int(r,101)};});
+ var good=typeName(),bad=r()<.35?good:typeName();
  return {
-  radar:radar,bars:bars,
-  intro:fill(pick(r,D.INTRO)),type:type,code:code.join("")+"-"+(1+int(r,9))+"型",codeMeaning:codeMeaning,
+  type:type,catchcopy:pick(r,D.CATCH),code:code.join("")+"-"+(1+int(r,9))+"型",codeMeaning:codeMeaning,
   rarity:fill(pick(r,D.RARITY)),
+  radar:pickN(r,D.METRICS,6).map(function(m){return {name:m,v:int(r,101)};}),
+  bars:pickN(r,D.PAIRS,3).map(function(p){return {a:p[0],b:p[1],va:int(r,101),vb:int(r,101)};}),
   metrics:pickN(r,D.METRICS,CONFIG.metricCount).map(function(m){return [m,fill(pick(r,D.METRIC_FORMATS))];}),
   desc:pickN(r,D.DESC,CONFIG.descCount).map(fill),
   strengths:strengths,weak:weak,
   good:pick(r,D.COMPAT_GOOD).replace("{t}",good),bad:fill(pick(r,D.COMPAT_BAD).replace("{t}",bad)),
-  jobs:pickN(r,D.JOBS,CONFIG.jobCount),item:pick(r,D.LUCKY_ITEMS),place:pick(r,D.LUCKY_PLACES),
+  role:pick(r,D.ROLES),
+  jobs:pickN(r,D.JOBS,CONFIG.jobCount),hobbies:pickN(r,D.HOBBIES,CONFIG.hobbyCount),
+  future:fill(pick(r,D.FUTURE)),theme:pick(r,D.THEMES),motto:pick(r,D.MOTTOS),
+  animal:pick(r,D.ANIMALS),color:pick(r,D.COLORS),
+  item:pick(r,D.LUCKY_ITEMS),place:pick(r,D.LUCKY_PLACES),
   advice:fill(pick(r,D.ADVICE)),note:pick(r,D.DISCLAIMERS)
  };
 }
 
 // ===== 画面 =====
-var st={seed:"",quiz:[],i:0,fromUrl:false};
+var st={seed:"",quiz:[],i:0,ans:[],fromUrl:false};
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
 function cleanSeed(s){return String(s||"").trim().slice(0,40);}
-function shareUrl(){var u=new URL(location.href);u.search="";u.hash="";u.searchParams.set("seed",st.seed);return u.toString();}
+function shareUrl(){var u=new URL(location.href);u.search="";u.hash="";u.searchParams.set("seed",st.seed);
+ if(st.ans.length===st.quiz.length&&st.quiz.length)u.searchParams.set("a",st.ans.join(""));return u.toString();}
 function setUrl(){try{history.replaceState(null,"",shareUrl());}catch(e){}}
 function show(id){["start","quiz","analyzing","result"].forEach(function(k){$(k).classList.toggle("hidden",k!==id);});scrollTo(0,0);}
 function toast(t){var el=$("toast");el.textContent=t;el.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(function(){el.classList.remove("on");},1800);}
-function startQuiz(seed){st.seed=cleanSeed(seed)||newSeed();st.quiz=buildQuiz(st.seed);st.i=0;setUrl();renderQ();show("quiz");}
+
+function startQuiz(seed){st.seed=cleanSeed(seed)||newSeed();st.quiz=buildQuiz(st.seed);st.i=0;st.ans=[];setUrl();renderQ();show("quiz");}
 function renderQ(){var q=st.quiz[st.i],tot=st.quiz.length;
  $("qnum").textContent="第"+(st.i+1)+"問 / 全"+tot+"問";
  $("prog").style.width=(st.i/tot*100)+"%";$("qtext").textContent=q.text;
  var box=$("opts");box.innerHTML="";
- q.opts.forEach(function(o){var b=document.createElement("button");b.type="button";b.textContent=o;b.onclick=next;box.appendChild(b);});
+ q.opts.forEach(function(o,idx){var b=document.createElement("button");b.type="button";b.textContent=o;b.onclick=function(){choose(idx);};box.appendChild(b);});
  $("back").classList.toggle("hidden",st.i===0);}
-function next(){if(st.i<st.quiz.length-1){st.i++;renderQ();scrollTo(0,0);}else analyze();}
+function choose(idx){st.ans[st.i]=idx;st.ans.length=st.i+1;
+ if(st.i<st.quiz.length-1){st.i++;renderQ();scrollTo(0,0);}else{setUrl();analyze();}}
 function analyze(){show("analyzing");var msgs=["回答を分析しています","傾向を集計しています","タイプを判定しています"],k=0;
  $("anaText").textContent=msgs[0];var tm=setInterval(function(){k++;$("anaText").textContent=msgs[k%msgs.length];},Math.max(200,CONFIG.analyzeMs/msgs.length));
  setTimeout(function(){clearInterval(tm);renderResult();},CONFIG.analyzeMs);}
-function radarSvg(items){var S=320,c=S/2,R=100,n=items.length,svg='<svg class="chart" viewBox="0 0 '+S+' '+S+'" role="img" aria-label="レーダーチャート">';
- function pt(i,k){var a=-Math.PI/2+2*Math.PI*i/n;return [c+R*k*Math.cos(a),c+R*k*Math.sin(a)];}
- [.25,.5,.75,1].forEach(function(k){svg+='<polygon class="grid" points="'+items.map(function(_,i){return pt(i,k).map(function(x){return x.toFixed(1);}).join(",");}).join(" ")+'"/>';});
- items.forEach(function(it,i){var e=pt(i,1),l=pt(i,1.2);svg+='<line class="axis" x1="'+c+'" y1="'+c+'" x2="'+e[0].toFixed(1)+'" y2="'+e[1].toFixed(1)+'"/>'+
-  '<text x="'+l[0].toFixed(1)+'" y="'+(l[1]+4).toFixed(1)+'" text-anchor="'+(Math.abs(l[0]-c)<8?"middle":l[0]>c?"start":"end")+'">'+esc(it.name)+'</text>';});
- svg+='<polygon class="area" points="'+items.map(function(it,i){return pt(i,it.v/100).map(function(x){return x.toFixed(1);}).join(",");}).join(" ")+'"/>';
+function li(a){return a.map(function(x){return "<li>"+esc(x)+"</li>";}).join("");}
+function radarSvg(items){var W=480,H=320,cx=W/2,cy=H/2,R=95,n=items.length,svg='<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="レーダーチャート">';
+ function pt(i,k){var a=-Math.PI/2+2*Math.PI*i/n;return [cx+R*k*Math.cos(a),cy+R*k*Math.sin(a)];}
+ function f(p){return p.map(function(x){return x.toFixed(1);}).join(",");}
+ [.25,.5,.75,1].forEach(function(k){svg+='<polygon class="grid" points="'+items.map(function(_,i){return f(pt(i,k));}).join(" ")+'"/>';});
+ items.forEach(function(it,i){var e=pt(i,1),l=pt(i,1.14);
+  svg+='<line class="axis" x1="'+cx+'" y1="'+cy+'" x2="'+e[0].toFixed(1)+'" y2="'+e[1].toFixed(1)+'"/>'+
+  '<text x="'+l[0].toFixed(1)+'" y="'+(l[1]+4).toFixed(1)+'" text-anchor="'+(Math.abs(l[0]-cx)<8?"middle":l[0]>cx?"start":"end")+'">'+esc(it.name)+'</text>';});
+ svg+='<polygon class="area" points="'+items.map(function(it,i){return f(pt(i,it.v/100));}).join(" ")+'"/>';
  items.forEach(function(it,i){var q=pt(i,it.v/100);svg+='<circle class="dot" cx="'+q[0].toFixed(1)+'" cy="'+q[1].toFixed(1)+'" r="3"/>';});
  return svg+'</svg>';}
 function barsHtml(a){return '<div class="bars">'+a.map(function(b){return '<div class="bar2"><div class="lab"><span>'+esc(b.a)+' '+b.va+'%</span><span>'+esc(b.b)+' '+b.vb+'%</span></div>'+
  '<div class="tr"><i style="width:'+b.va+'%"></i></div><div class="tr b"><i style="width:'+b.vb+'%"></i></div></div>';}).join("")+'</div>';}
-function li(a){return a.map(function(x){return "<li>"+esc(x)+"</li>";}).join("");}
-function renderResult(){var R=buildResult(st.seed,st.quiz);var gs={},genres=[];st.quiz.forEach(function(q){if(!gs[q.genre]){gs[q.genre]=1;genres.push(q.genre);}});
+function fitType(){var box=document.querySelector(".typebox"),t=document.querySelector(".res-type");if(!box||!t)return;
+ var size=26;t.style.fontSize=size+"px";while(t.scrollWidth>box.clientWidth&&size>12){size--;t.style.fontSize=size+"px";}}
+function doCopy(){var u=shareUrl();(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){toast("URLをコピーしました");},function(){prompt("このURLをコピーしてください",u);});}
+function doShare(R){if(navigator.share){navigator.share({title:"究極の性格診断",text:"私は「"+R.type+"」タイプでした",url:shareUrl()}).catch(function(){});}else doCopy();}
+function renderResult(){var R=buildResult(st.seed,st.quiz,st.ans);var gs={},genres=[];st.quiz.forEach(function(q){if(!gs[q.genre]){gs[q.genre]=1;genres.push(q.genre);}});
  $("result").innerHTML=
- '<div class="card"><p class="res-sub">'+esc(R.intro)+'</p><p class="res-sub" style="margin-top:10px">あなたは</p>'+
- '<div class="res-type">「'+esc(R.type)+'」タイプ</div><div class="res-code">'+esc(R.code)+'</div>'+
+ '<div class="sharebar"><span>結果を友だちに送る</span><button type="button" id="copy">URLをコピー</button><button type="button" id="nshare">共有</button></div>'+
+ '<div class="card"><p class="res-sub">あなたは</p><div class="typebox"><div class="res-type">「'+esc(R.type)+'」タイプ</div></div>'+
+ '<p class="res-catch">'+esc(R.catchcopy)+'</p><div class="res-code">'+esc(R.code)+'</div>'+
  '<ul class="code-list">'+li(R.codeMeaning)+'</ul><p class="small" style="margin:8px 0 0">'+esc(R.rarity)+'</p></div>'+
  '<div class="card"><h2>性格バランス</h2>'+radarSvg(R.radar)+barsHtml(R.bars)+'</div>'+
  '<div class="card"><h2>診断スコア</h2><div class="metrics">'+R.metrics.map(function(m){return "<span>"+esc(m[0])+"</span><span>"+esc(m[1])+"</span>";}).join("")+'</div></div>'+
  '<div class="card desc"><h2>あなたの性格</h2>'+R.desc.map(function(d){return "<p>"+esc(d)+"</p>";}).join("")+'</div>'+
- '<div class="card"><h2>長所</h2><ul>'+li(R.strengths)+'</ul><h2 style="margin-top:12px">短所</h2><ul>'+li(R.weak)+'</ul></div>'+
- '<div class="card"><h2>相性</h2><p style="margin:0">'+esc(R.good)+'<br>'+esc(R.bad)+'</p></div>'+
- '<div class="card"><h2>向いている職業</h2><ul>'+li(R.jobs)+'</ul><h2 style="margin-top:12px">ラッキーアイテム / 場所</h2><p style="margin:0">'+esc(R.item)+' / '+esc(R.place)+'</p></div>'+
- '<div class="card"><h2>アドバイス</h2><p style="margin:0">'+esc(R.advice)+'</p><p class="small" style="margin:10px 0 0">'+esc(R.note)+'</p></div>'+
- '<div class="card"><button type="button" class="primary" id="again" style="margin-top:0">もう一度診断する</button>'+
- '<details class="foot"><summary>この診断について</summary><p>この診断は、'+esc(genres.join("・"))+'などの診断を参考にした、娯楽用の読み物です。結果に科学的な根拠はありません。</p>'+
- '<p>シード: <b>'+esc(st.seed)+'</b>(同じシードなら同じ質問・同じ結果になります)</p>'+
- '<div class="share"><button type="button" id="copy">URLをコピー</button>'+(navigator.share?'<button type="button" id="nshare">共有</button>':'')+'</div></details></div>';
- show("result");
- $("copy").onclick=function(){var u=shareUrl();(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){toast("コピーしました");},function(){prompt("このURLをコピーしてください",u);});};
- if($("nshare"))$("nshare").onclick=function(){navigator.share({title:"究極の性格診断",text:"「"+R.type+"」タイプでした",url:shareUrl()}).catch(function(){});};
+ '<div class="card"><h2>長所</h2><ul>'+li(R.strengths)+'</ul><h2 class="sp">短所</h2><ul>'+li(R.weak)+'</ul></div>'+
+ '<div class="card"><h2>人間関係</h2><p style="margin:0">'+esc(R.good)+'<br>'+esc(R.bad)+'</p><h2 class="sp">集団での役割</h2><p style="margin:0">'+esc(R.role)+'</p></div>'+
+ '<div class="card"><h2>向いている職業</h2><ul>'+li(R.jobs)+'</ul><h2 class="sp">向いている趣味</h2><ul>'+li(R.hobbies)+'</ul></div>'+
+ '<div class="card"><h2>10年後のあなた</h2><p style="margin:0">'+esc(R.future)+'</p><h2 class="sp">人生のテーマ</h2><p style="margin:0">'+esc(R.theme)+'</p><h2 class="sp">座右の銘</h2><p style="margin:0">'+esc(R.motto)+'</p></div>'+
+ '<div class="card"><h2>ラッキー</h2><div class="metrics"><span>アイテム</span><span>'+esc(R.item)+'</span><span>方角・場所</span><span>'+esc(R.place)+'</span><span>色</span><span>'+esc(R.color)+'</span><span>動物</span><span>'+esc(R.animal)+'</span></div></div>'+
+ '<div class="card"><h2>アドバイス</h2><p style="margin:0">'+esc(R.advice)+'</p></div>'+
+ '<div class="card"><button type="button" class="primary" id="again">もう一度診断する</button>'+
+ '<details class="foot" style="margin-top:14px"><summary>この診断について</summary><p>'+esc(R.note)+'</p><p>この診断は、'+esc(genres.join("・"))+'などの診断を参考にした、娯楽用の読み物です。</p>'+
+ '<p>シード: '+esc(st.seed)+'(同じシードなら同じ質問になり、回答が同じなら同じ結果になります)</p></details></div>';
+ show("result");fitType();
+ $("copy").onclick=doCopy;$("nshare").onclick=function(){doShare(R);};
  $("again").onclick=function(){$("seed").value="";st.fromUrl=false;try{history.replaceState(null,"",location.pathname);}catch(e){}show("start");};
 }
+addEventListener("resize",function(){if(!$("result").classList.contains("hidden"))fitType();});
 
 $("go").onclick=function(){startQuiz(st.fromUrl?$("seed").value:"");};
 $("seedLink").onclick=function(){$("seedBox").classList.toggle("hidden");$("seed").focus();};
 $("goSeed").onclick=function(){if(cleanSeed($("seed").value))startQuiz($("seed").value);};
 $("seed").addEventListener("keydown",function(e){if(e.key==="Enter")$("goSeed").click();});
-$("back").onclick=function(){if(st.i>0){st.i--;renderQ();}};
-var qs=new URLSearchParams(location.search);
-if(cleanSeed(qs.get("seed"))){$("seed").value=cleanSeed(qs.get("seed"));st.fromUrl=true;}
+$("back").onclick=function(){if(st.i>0){st.i--;st.ans.length=st.i;renderQ();}};
+(function(){var qs=new URLSearchParams(location.search),seed=cleanSeed(qs.get("seed"));
+ if(!seed)return;$("seed").value=seed;st.fromUrl=true;
+ var a=qs.get("a");if(!a)return;
+ var quiz=buildQuiz(seed);
+ if(a.length===quiz.length&&a.split("").every(function(c,i){return /^[0-9]$/.test(c)&&+c<quiz[i].opts.length;})){
+  st.seed=seed;st.quiz=quiz;st.ans=a.split("").map(Number);renderResult();}
+})();
 </script>
 </body>
 </html>
