@@ -60,7 +60,7 @@ button.sub,a.sub{display:inline-block;padding:10px 14px;font:inherit;font-size:.
 @keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 .pop{animation:pop .7s cubic-bezier(.2,1.6,.4,1)}
 @keyframes pop{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
-#fx{position:fixed;inset:0;pointer-events:none;z-index:10}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:10}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:.9rem;z-index:11;opacity:0;transition:opacity .2s}
 .toast.on{opacity:1}
 @media (prefers-reduced-motion:reduce){.shake,.pop{animation:none}}
@@ -506,12 +506,12 @@ function celebrate() {
     const fromLeft = i % 2 === 0, a = (fromLeft ? -60 : -120) * Math.PI / 180 + (Math.random() - .5) * .9, sp = 9 + Math.random() * 9;
     ps.push({ x: fromLeft ? 0 : W, y: H * .75, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: Math.random() * 6.28, vr: (Math.random() - .5) * .4, w: 6 + Math.random() * 6, h: 8 + Math.random() * 8, c: cols[i % cols.length] });
   }
-  const t0 = performance.now();
-  (function frame(t) {
+  const t0 = performance.now(); let last = t0;
+  (function frame(t) { // 経過時間で動かす(遅い端末でも同じ速さ)
     ctx.clearRect(0, 0, W, H);
-    const life = t - t0;
+    const life = t - t0, k = Math.min(4, (t - last) / 16.7); last = t;
     for (const p of ps) {
-      p.vy += .32; p.vx *= .99; p.vy *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      p.vy += .32 * k; const f = Math.pow(.99, k); p.vx *= f; p.vy *= f; p.x += p.vx * k; p.y += p.vy * k; p.r += p.vr * k;
       ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.globalAlpha = Math.max(0, 1 - life / 4000);
       ctx.fillRect(-p.w / 2, -p.h / 2 * Math.abs(Math.cos(p.r * 2)), p.w, p.h * Math.abs(Math.cos(p.r * 2)) + 1); ctx.restore();
     }
