@@ -8,25 +8,34 @@
 :root{--bg:#f4f6fa;--fg:#1c2330;--card:#fff;--ac:#2563eb;--bd:#d5dbe6}
 @media (prefers-color-scheme:dark){:root{--bg:#10141c;--fg:#e8ecf3;--card:#1a2030;--bd:#333c50}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Hiragino Sans",sans-serif}
-main{max-width:520px;margin:0 auto;padding:16px}
-h1{font-size:1.3rem;margin:.2em 0 .6em}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:14px}
-label{display:block;font-weight:600;margin:10px 0 4px;font-size:.9rem}
-input[type=text],input[type=password],select{width:100%;padding:10px;font-size:16px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg)}
-.row{display:flex;gap:8px;align-items:center}
-.row input[type=checkbox]{width:20px;height:20px}
-.inline{display:flex;gap:8px;align-items:center;margin-top:10px}
-button{padding:12px 18px;font-size:16px;border:0;border-radius:8px;background:var(--ac);color:#fff;font-weight:600;cursor:pointer}
-#qrbox{background:#fff;padding:16px;border-radius:12px;display:flex;justify-content:center}
-#qrbox svg{width:100%;max-width:420px;height:auto;display:block}
-#msg{color:#c0392b;min-height:1.4em;font-size:.9rem}
-.note{font-size:.8rem;opacity:.75}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,-apple-system,"Hiragino Sans",sans-serif}
+main{max-width:1100px;margin:0 auto;padding:10px;display:grid;gap:10px;grid-template-columns:1fr}
+h1{font-size:1rem;margin:0 0 6px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px}
+.form .full{grid-column:1/-1}
+label{display:block;font-weight:600;margin:0 0 2px;font-size:.78rem}
+input[type=text],input[type=password],select{width:100%;padding:7px 8px;font-size:16px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--fg)}
+.chk{display:flex;gap:6px;align-items:center;font-size:.85rem}
+.chk input{width:18px;height:18px;margin:0}
+.chk label{margin:0;font-weight:400;font-size:.85rem}
+button{padding:10px 18px;font-size:16px;border:0;border-radius:8px;background:var(--ac);color:#fff;font-weight:600;cursor:pointer}
+#qrcard{display:flex;flex-direction:column;align-items:center;gap:6px}
+#qrbox{background:#fff;padding:8px;border-radius:10px;width:100%;display:flex;justify-content:center}
+#qrbox svg{width:100%;max-width:calc(100dvh - 90px);height:auto;display:block}
+#msg{color:#c0392b;min-height:1.2em;font-size:.85rem;margin:0}
+.note{font-size:.72rem;opacity:.75;margin:0}
 #ssidprint{text-align:center;font-weight:700;margin:8px 0 0;display:none}
+@media (min-width:760px) and (min-aspect-ratio:1/1){
+ main{grid-template-columns:300px 1fr;align-items:start;padding:16px;gap:16px}
+ .form{grid-template-columns:1fr}
+ #qrcard{position:sticky;top:16px}
+ #qrbox svg{max-width:calc(100dvh - 120px)}
+}
 @media print{
  body{background:#fff;color:#000}
  .noprint{display:none!important}
- main{max-width:none;padding:0}
+ main{display:block;max-width:none;padding:0}
  .card{border:0;padding:0}
  #qrbox{padding:0}
  #qrbox svg{max-width:none;width:16cm}
@@ -36,27 +45,27 @@ button{padding:12px 18px;font-size:16px;border:0;border-radius:8px;background:va
 </head>
 <body>
 <main>
-<h1 class="noprint">Wi-Fi QR コード</h1>
 <div class="card noprint">
- <label for="ssid">SSID(ネットワーク名)</label>
- <input id="ssid" type="text" autocomplete="off" autocapitalize="off" spellcheck="false">
- <label for="enc">暗号化方式</label>
- <select id="enc"><option value="WPA">WPA/WPA2/WPA3</option><option value="WEP">WEP</option><option value="nopass">なし</option></select>
- <div id="pwwrap">
-  <label for="pw">パスワード</label>
-  <input id="pw" type="password" autocomplete="off" autocapitalize="off" spellcheck="false">
-  <div class="inline"><input id="show" type="checkbox"><label for="show" style="margin:0;font-weight:400">パスワードを表示</label></div>
+ <h1>Wi-Fi QR コード</h1>
+ <div class="form">
+  <div class="full"><label for="ssid">SSID(ネットワーク名)</label>
+   <input id="ssid" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+  <div><label for="enc">暗号化方式</label>
+   <select id="enc"><option value="WPA">WPA/WPA2/WPA3</option><option value="WEP">WEP</option><option value="nopass">なし</option></select></div>
+  <div id="pwwrap"><label for="pw">パスワード</label>
+   <input id="pw" type="password" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+  <div class="chk" id="showwrap"><input id="show" type="checkbox"><label for="show">パスワードを表示</label></div>
+  <div class="chk"><input id="hid" type="checkbox"><label for="hid">ステルスSSID(隠し)</label></div>
+  <p class="note full">入力内容はこの端末のブラウザ内だけで処理され、送信も保存もされません。</p>
  </div>
- <div class="inline"><input id="hid" type="checkbox" style="width:20px;height:20px"><label for="hid" style="margin:0;font-weight:400">ステルスSSID(隠しネットワーク)</label></div>
- <p class="note">入力内容はこの端末のブラウザ内だけで処理され、送信も保存もされません。</p>
 </div>
-<div class="card">
+<div class="card" id="qrcard">
  <div id="qrbox"></div>
  <p id="ssidprint"></p>
  <p id="msg" class="noprint"></p>
  <div class="noprint"><button id="print" type="button">印刷</button></div>
+ <p class="note noprint" id="payload"></p>
 </div>
-<p class="note noprint" id="payload"></p>
 </main>
 <script>
 "use strict";
@@ -159,7 +168,7 @@ function wifiString(ssid,enc,pw,hidden){
  var $=function(i){return document.getElementById(i);};
  function render(){
   var enc=$("enc").value,ssid=$("ssid").value;
-  $("pwwrap").style.display=enc==="nopass"?"none":"";
+  $("pwwrap").style.visibility=enc==="nopass"?"hidden":"";$("showwrap").style.visibility=enc==="nopass"?"hidden":"";
   $("msg").textContent="";$("qrbox").innerHTML="";$("ssidprint").textContent="";
   if(!ssid){$("payload").textContent="SSIDを入力するとQRコードが表示されます。";return;}
   var s=wifiString(ssid,enc,$("pw").value,$("hid").checked),m;
