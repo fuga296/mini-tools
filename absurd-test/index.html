@@ -7,9 +7,8 @@
 <title>究極の性格診断</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{--bg:#F8F8F6;--panel:#FFFFFF;--ink:#252525;--sub:#777777;--main:#34465A;--sel:#E8EDF2;--line:#DCDCDC;--aux:#8B978B;--r:8px}
-html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;line-height:1.8}
-.serif{font-family:"Noto Serif JP","Hiragino Mincho ProN","Yu Mincho","YuMincho",serif}
+:root{--bg:#F8F8F6;--panel:#FFFFFF;--ink:#252525;--sub:#777777;--main:#34465A;--sel:#E8EDF2;--line:#DCDCDC;--aux:#8B978B;--r:8px;--font:"Noto Serif JP","Hiragino Mincho ProN","Hiragino Mincho Pro","Yu Mincho","YuMincho","游明朝","BIZ UDPMincho","MS PMincho","MS Mincho",serif}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.8}
 .hidden{display:none!important}
 button{font:inherit;font-size:15px;border-radius:var(--r);border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:11px 16px;cursor:pointer}
 button.primary{background:var(--main);border-color:var(--main);color:#fff;font-weight:700}
@@ -19,7 +18,7 @@ body.start,body.quiz,body.analyzing{height:100dvh;overflow:hidden}
 
 /* ホーム */
 .start-in{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-.start-in h1{font-family:"Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",serif;font-size:34px;font-weight:700;letter-spacing:.12em;margin:0 0 14px;color:var(--main)}
+.start-in h1{font-family:var(--font);font-size:34px;font-weight:700;letter-spacing:.12em;margin:0 0 14px;color:var(--main)}
 .start-in .desc{margin:0 0 44px;color:var(--sub);font-size:15px}
 .start-in .primary{width:100%;max-width:300px;padding:15px;font-size:17px;letter-spacing:.1em}
 .seedlink{background:none;border:0;color:var(--sub);font-size:12px;margin-top:34px;padding:6px 10px;text-decoration:underline}
@@ -45,16 +44,16 @@ body.start,body.quiz,body.analyzing{height:100dvh;overflow:hidden}
 /* 結果 */
 body.result{overflow:auto}
 #result{max-width:560px;margin:0 auto;padding:0 20px calc(env(safe-area-inset-bottom) + 32px)}
-.rhead{margin:0 -20px;padding:calc(env(safe-area-inset-top) + 14px) 20px 14px;background:var(--main);color:#fff;text-align:center;font-family:"Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",serif;font-size:17px;letter-spacing:.3em}
+.rhead{margin:0 -20px;padding:calc(env(safe-area-inset-top) + 14px) 20px 14px;background:var(--main);color:#fff;text-align:center;font-family:var(--font);font-size:17px;letter-spacing:.3em}
 .rtop{padding:26px 0 20px;border-bottom:1px solid var(--line);text-align:center}
 .lab{font-size:12px;color:var(--sub);margin:0 0 4px;letter-spacing:.1em}
 .typebox{overflow:hidden}
-.res-type{font-family:"Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",serif;font-size:24px;font-weight:700;line-height:1.5;white-space:nowrap;display:inline-block;color:var(--main)}
+.res-type{font-family:var(--font);font-size:24px;font-weight:700;line-height:1.5;white-space:nowrap;display:inline-block;color:var(--main)}
 .res-catch{font-size:14px;color:var(--sub);margin:4px 0 16px}
 .sharebox{display:flex;gap:8px;justify-content:center}
 .sharebox button{flex:1;max-width:200px;font-size:14px;padding:10px 8px;border-color:var(--main);color:var(--main)}
 .sec{padding:20px 0 6px;border-bottom:1px solid var(--line)}
-.sec h2{font-family:"Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",serif;font-size:17px;margin:0 0 10px;color:var(--main);padding-left:10px;border-left:3px solid var(--main);line-height:1.4}
+.sec h2{font-family:var(--font);font-size:17px;margin:0 0 10px;color:var(--main);padding-left:10px;border-left:3px solid var(--main);line-height:1.4}
 .sec h3{font-size:13px;color:var(--sub);margin:12px 0 2px;font-weight:700}
 .sec p{margin:0 0 10px;font-size:15px}
 .sec ul{margin:0 0 10px;padding-left:1.3em;font-size:15px}
