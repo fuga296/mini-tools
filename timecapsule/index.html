@@ -7,61 +7,76 @@
 <meta name="referrer" content="no-referrer">
 <title>正解はn年後</title>
 <style>
-:root{--bg:#f6f3ee;--fg:#22201c;--sub:#6b655c;--card:#fffdf9;--ac:#c2410c;--ac2:#fde7d8;--bd:#e3dccf;--ok:#15803d;--ng:#b91c1c}
-@media (prefers-color-scheme:dark){:root{--bg:#16140f;--fg:#f0ebe2;--sub:#a9a194;--card:#211e18;--ac:#fb923c;--ac2:#3a2617;--bd:#3a352b;--ok:#4ade80;--ng:#f87171}}
+:root{--bg:#dde4ea;--sheet:#f5f7f8;--field:#fbfcfc;--ink:#1b2a41;--sub:#52627a;--rule:#c3ccd6;--seal:#a8322d;--onseal:#f5f7f8;--ok:#2b6a49;
+--serif:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho","Noto Serif JP","BIZ UDMincho",serif;
+--sans:"BIZ UDPGothic","Hiragino Sans","Yu Gothic UI","Noto Sans JP",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1118;--sheet:#15202c;--field:#0f1822;--ink:#e4eaf1;--sub:#93a3b6;--rule:#2c3b4d;--seal:#e5726a;--onseal:#1a0d0c;--ok:#6fc79a}}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif}
-main{max-width:560px;margin:0 auto;padding:16px 16px calc(32px + env(safe-area-inset-bottom))}
-header{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:4px 0 14px}
-h1{font-size:1.35rem;margin:0;letter-spacing:.02em}
-h1 a{color:inherit;text-decoration:none}
-h2{font-size:1.05rem;margin:0 0 10px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin-bottom:14px}
-label{display:block;font-weight:600;margin:14px 0 6px;font-size:.92rem}
-label:first-of-type{margin-top:0}
-.opt{font-weight:400;color:var(--sub);font-size:.8rem}
-input[type=text],input[type=datetime-local],textarea{width:100%;padding:11px 12px;font:inherit;font-size:16px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--fg)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.8 var(--sans);word-break:auto-phrase;line-break:strict}
+main{max-width:600px;min-height:100vh;margin:0 auto;padding:18px 20px calc(40px + env(safe-area-inset-bottom));background:var(--sheet)}
+@media (min-width:640px){main{border-left:1px solid var(--rule);border-right:1px solid var(--rule)}}
+.top{border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:20px}
+.top a{font:700 1.4rem/1.4 var(--serif);color:var(--ink);text-decoration:none;font-feature-settings:"palt"}
+h2{font:700 1.2rem/1.4 var(--serif);margin:0 0 6px;font-feature-settings:"palt"}
+h3{font:700 1rem/1.5 var(--sans);margin:22px 0 6px}
+p{margin:0}
+.lead{margin:0 0 4px}
+.back{display:inline-block;font-size:.9rem;color:var(--sub);text-decoration:none;margin-bottom:10px}
+.back:hover{color:var(--ink);text-decoration:underline}
+label{display:block;font-weight:700;margin:20px 0 6px;font-size:.95rem}
+.opt{font-weight:400;color:var(--sub);font-size:.82rem}
+input[type=text],input[type=datetime-local],textarea{width:100%;padding:11px 12px;font:inherit;font-size:16px;border:1px solid var(--rule);border-radius:2px;background:var(--field);color:var(--ink)}
 textarea{min-height:5.5em;resize:vertical}
-input:focus,textarea:focus{outline:2px solid var(--ac);outline-offset:1px}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{padding:8px 13px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);color:var(--fg);font:inherit;font-size:.92rem;cursor:pointer}
-.chip[aria-pressed=true]{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600}
-button.main,a.main{display:block;width:100%;padding:14px;font:inherit;font-size:1.05rem;font-weight:700;border:0;border-radius:12px;background:var(--ac);color:#fff;cursor:pointer;text-align:center;text-decoration:none}
-button.main:disabled{opacity:.45;cursor:default}
-button.sub,a.sub{display:inline-block;padding:10px 14px;font:inherit;font-size:.92rem;font-weight:600;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--fg);cursor:pointer;text-decoration:none}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.row>*{flex:1 1 auto}
-.note{font-size:.82rem;color:var(--sub);margin:8px 0 0}
-.warn{font-size:.85rem;color:var(--ng);margin:8px 0 0}
-.when{font-size:.95rem;margin-top:10px;padding:10px 12px;background:var(--ac2);border-radius:10px}
-.code{width:100%;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all;min-height:6em}
+input:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:2px solid var(--seal);outline-offset:2px}
+.btn{display:block;width:100%;text-align:center;padding:13px 14px;border:1px solid var(--ink);border-radius:2px;background:none;color:var(--ink);font:inherit;font-weight:700;line-height:1.5;cursor:pointer;text-decoration:none}
+.btn small{display:block;font-weight:400;font-size:.8rem;color:var(--sub)}
+.btn.primary{background:var(--seal);border-color:var(--seal);color:var(--onseal)}
+.btn.primary small{color:var(--onseal);opacity:.85}
+.btn.sm{padding:9px 12px;font-size:.92rem;font-weight:600;width:auto;flex:1 1 auto}
+.btn:disabled{opacity:.5;cursor:default}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0 28px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.note{font-size:.84rem;color:var(--sub);margin-top:8px}
+.warn{font-size:.88rem;color:var(--seal);margin-top:8px}
+.when{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:9px 0;margin-top:14px;font-weight:700}
+.span{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.chip{padding:9px 4px;border:1px solid var(--rule);border-radius:2px;background:var(--field);color:var(--ink);font:inherit;font-size:.92rem;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--sheet);font-weight:700}
+.chip.wide{grid-column:1/-1}
+.code{font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;word-break:break-all;min-height:6em}
 .hidden{display:none!important}
-.big{font-size:1.25rem;font-weight:700;margin:4px 0}
-.cd{font-variant-numeric:tabular-nums;font-size:1.5rem;font-weight:700;letter-spacing:.02em;margin:6px 0}
-.lock{font-size:3rem;text-align:center;line-height:1;margin:6px 0 4px}
-.title{font-size:1.15rem;font-weight:700;word-break:break-word}
-.q{white-space:pre-wrap;word-break:break-word;font-size:1.15rem;padding:12px;background:var(--bg);border-radius:10px;margin:6px 0 4px}
+.stamp{width:44px;height:44px;flex:none;color:var(--sub);transform:rotate(-8deg)}
+.stamp.ready{color:var(--seal)}
+.stamp.done{color:var(--ok)}
+.stamp.big{width:76px;height:76px}
+.notice{border:1px solid var(--seal);color:var(--seal);font-weight:700;padding:8px 12px;margin:0 0 18px}
+.shelf-h{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--ink);padding-bottom:4px}
 .list{list-style:none;margin:0;padding:0}
-.list li{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--bd)}
-.list li:first-child{border-top:0}
-.list a{flex:1;color:inherit;text-decoration:none;min-width:0}
-.list .t{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.list .d{display:block;font-size:.8rem;color:var(--sub)}
-.badge{font-size:.75rem;padding:2px 8px;border-radius:999px;background:var(--ac2);color:var(--ac);white-space:nowrap;font-weight:600}
-.badge.ready{background:var(--ac);color:#fff}
-.badge.done{background:transparent;color:var(--ok);border:1px solid var(--ok)}
-.del{border:0;background:none;color:var(--sub);font-size:1.1rem;cursor:pointer;padding:4px 6px}
-#msg{min-height:1.5em;font-size:.9rem;color:var(--ng);margin:8px 0 0}
-.result{text-align:center;font-weight:800;font-size:1.6rem;margin:10px 0 0;min-height:1.6em}
+.list li{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--rule)}
+.list a{display:flex;align-items:center;gap:12px;flex:1;min-width:0;color:inherit;text-decoration:none}
+.list .tx{min-width:0;flex:1}
+.list .t{display:block;font:700 1.02rem/1.5 var(--serif);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list .d{display:block;font-size:.8rem;color:var(--sub);line-height:1.5}
+.list .s{font-size:.82rem;color:var(--sub);white-space:nowrap;text-align:right}
+.list .s.ready{color:var(--seal);font-weight:700}
+.list .s.done{color:var(--ok);font-weight:700}
+.del{border:0;background:none;color:var(--sub);font:inherit;font-size:.8rem;cursor:pointer;padding:6px 2px;text-decoration:underline}
+#msg{min-height:1.5em;font-size:.9rem;color:var(--seal);margin-top:10px}
+.head{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.title{font:700 1.25rem/1.5 var(--serif);word-break:break-word}
+.cd{font:700 2rem/1.3 var(--serif);font-variant-numeric:tabular-nums;margin:2px 0 6px}
+.q{white-space:pre-wrap;word-break:break-word;font:700 1.2rem/1.8 var(--serif);border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);padding:12px 0;margin:8px 0 4px}
+.a{font:700 1.1rem/1.6 var(--serif);margin-top:14px}
+.result{font:700 1.7rem/1.4 var(--serif);margin-top:12px;min-height:1.4em}
 .result.ok{color:var(--ok)}
-.result.ng{color:var(--ng)}
+.result.ng{color:var(--seal)}
 .shake{animation:shake .4s}
 @keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
-.pop{animation:pop .7s cubic-bezier(.2,1.6,.4,1)}
-@keyframes pop{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
+.pop{animation:pop .5s ease-out}
+@keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:10}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:.9rem;z-index:11;opacity:0;transition:opacity .2s}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--sheet);padding:8px 16px;border-radius:2px;font-size:.9rem;z-index:11;opacity:0;transition:opacity .2s}
 .toast.on{opacity:1}
 @media (prefers-reduced-motion:reduce){.shake,.pop{animation:none}}
 </style>
@@ -69,106 +84,108 @@ button.sub,a.sub{display:inline-block;padding:10px 14px;font:inherit;font-size:.
 <body>
 <canvas id="fx"></canvas>
 <main>
-<header><h1><a href="#" id="home">正解はn年後</a></h1></header>
+<div class="top"><a href="#" id="home">正解はn年後</a></div>
 
 <!-- ホーム -->
 <section id="v-home">
- <div class="card">
-  <h2>タイムカプセル問題をつくる</h2>
-  <label for="f-title">表書き <span class="opt">任意・期限前も見える</span></label>
-  <input id="f-title" type="text" maxlength="60" placeholder="例: 2026年の自分から">
-  <label for="f-q">問題 <span class="opt">期限まで誰にも見えない</span></label>
-  <textarea id="f-q" maxlength="1000" placeholder="例: 2026年の秋、毎朝聴いていた曲は?"></textarea>
-  <label for="f-a">答え</label>
-  <input id="f-a" type="text" maxlength="200" autocomplete="off" placeholder="例: 夜に駆ける">
-  <p class="note">答え合わせでは、全角/半角・大文字/小文字・ひらがな/カタカナ・空白と句読点の違いは無視します。</p>
-  <label>開けられるのは</label>
-  <div class="chips" id="f-span">
-   <button type="button" class="chip" data-m="1">1か月後</button>
-   <button type="button" class="chip" data-m="6">半年後</button>
-   <button type="button" class="chip" data-m="12" aria-pressed="true">1年後</button>
-   <button type="button" class="chip" data-m="36">3年後</button>
-   <button type="button" class="chip" data-m="60">5年後</button>
-   <button type="button" class="chip" data-m="120">10年後</button>
-   <button type="button" class="chip" data-m="custom">日時を指定</button>
-  </div>
-  <input id="f-at" type="datetime-local" class="hidden" style="margin-top:10px" aria-label="開けられる日時">
-  <div class="when" id="f-when"></div>
-  <p class="warn hidden" id="f-long">10年を超える期限は、drand(公開ビーコン)がそれまで続いている必要があります。止まると永久に開けません。</p>
-  <p id="msg" role="alert"></p>
-  <button type="button" class="main" id="f-make">封をする</button>
-  <p class="note">封をすると、作った本人も期限まで中身を見られません。暗号化はこの端末の中だけで行い、何も送信しません。</p>
+ <p class="lead">問題と答えに封をして、期限が来るまで開けない。作った本人も開けません。</p>
+ <div class="actions">
+  <a class="btn primary" href="#new">つくる<small>問題に封をする</small></a>
+  <a class="btn" href="#open">みる<small>もらったカプセルを開く</small></a>
  </div>
+ <p class="notice hidden" id="h-notice" role="status"></p>
+ <div class="shelf-h"><h2>預けているカプセル</h2></div>
+ <ul class="list" id="mine"></ul>
+ <p class="note" id="mine-empty">まだありません。「つくる」で封をするか、「みる」でもらったカプセルを開くと、ここに並びます。中身は暗号のまま、この端末の中だけに残ります。</p>
+</section>
 
- <div class="card">
-  <h2>受け取ったカプセルを開く</h2>
-  <textarea id="o-in" class="code" placeholder="リンク、または TC1. で始まる文字列を貼り付け" aria-label="カプセルのリンクか文字列"></textarea>
-  <div class="row"><button type="button" class="main" id="o-go">開く</button></div>
+<!-- つくる -->
+<section id="v-new" class="hidden">
+ <a class="back" href="#">← ホームへ</a>
+ <h2>つくる</h2>
+ <label for="f-title">表書き <span class="opt">任意・期限前も見える</span></label>
+ <input id="f-title" type="text" maxlength="60" placeholder="例: 2026年の自分から">
+ <label for="f-q">問題 <span class="opt">期限まで誰にも見えない</span></label>
+ <textarea id="f-q" maxlength="1000" placeholder="例: 2026年の秋、毎朝聴いていた曲は?"></textarea>
+ <label for="f-a">答え</label>
+ <input id="f-a" type="text" maxlength="200" autocomplete="off" placeholder="例: 夜に駆ける">
+ <p class="note">答え合わせでは、全角/半角・大文字/小文字・ひらがな/カタカナ・空白と句読点の違いは無視します。</p>
+ <label>開けられるのは</label>
+ <div class="span" id="f-span">
+  <button type="button" class="chip" data-m="1">1か月後</button>
+  <button type="button" class="chip" data-m="6">半年後</button>
+  <button type="button" class="chip" data-m="12" aria-pressed="true">1年後</button>
+  <button type="button" class="chip" data-m="36">3年後</button>
+  <button type="button" class="chip" data-m="60">5年後</button>
+  <button type="button" class="chip" data-m="120">10年後</button>
+  <button type="button" class="chip wide" data-m="custom">日時を指定</button>
  </div>
+ <input id="f-at" type="datetime-local" class="hidden" style="margin-top:8px" aria-label="開けられる日時">
+ <div class="when" id="f-when"></div>
+ <p class="warn hidden" id="f-long">10年を超える期限は、drand(公開ビーコン)がそれまで続いている必要があります。止まると永久に開けません。</p>
+ <p id="msg" role="alert"></p>
+ <button type="button" class="btn primary" id="f-make" style="margin-top:6px">封をする</button>
+ <p class="note">封をすると、作った本人も期限まで中身を見られません。暗号化はこの端末の中だけで行い、何も送信しません。</p>
+</section>
 
- <div class="card" id="mine-card">
-  <h2>この端末のカプセル</h2>
-  <ul class="list" id="mine"></ul>
-  <p class="note" id="mine-empty">まだありません。作ったり開いたりしたカプセルは、暗号のままここに残ります。</p>
- </div>
+<!-- みる -->
+<section id="v-open" class="hidden">
+ <a class="back" href="#">← ホームへ</a>
+ <h2>みる</h2>
+ <p>もらったリンク、または <code>TC1.</code> で始まる文字列を貼り付けてください。</p>
+ <textarea id="o-in" class="code" style="margin-top:12px" placeholder="リンクか文字列を貼り付け" aria-label="カプセルのリンクか文字列"></textarea>
+ <button type="button" class="btn primary" id="o-go" style="margin-top:10px">開く</button>
+ <p class="note">期限前のカプセルは、残り時間が表示されます。</p>
 </section>
 
 <!-- 作成完了 -->
 <section id="v-made" class="hidden">
- <div class="card">
-  <div class="lock" aria-hidden="true">🔒</div>
-  <p class="big" style="text-align:center">封をしました</p>
-  <p class="when" id="m-when"></p>
-  <h2 style="margin-top:16px">1. 期限の日をカレンダーに入れる</h2>
-  <button type="button" class="main" id="m-ics">カレンダーに追加(.ics)</button>
-  <p class="note">期限の時刻に通知が来ます。予定のメモにカプセルのリンクが入っています。</p>
-  <h2 style="margin-top:18px">2. リンクか文字列を保管・共有する</h2>
-  <div class="row">
-   <button type="button" class="sub" id="m-share">共有</button>
-   <button type="button" class="sub" id="m-copylink">リンクをコピー</button>
-   <button type="button" class="sub" id="m-copycode">文字列をコピー</button>
-  </div>
-  <textarea class="code" id="m-code" readonly style="margin-top:10px" aria-label="カプセルの文字列"></textarea>
-  <p class="note">これが無いと開けません。別の端末でも、このページに貼れば開けます。中身は暗号なので、人に渡しても期限までは読まれません。</p>
-  <div class="row"><a class="sub" id="m-open" href="#">このカプセルを見る</a><a class="sub" href="#">トップへ</a></div>
+ <div class="head"><span id="m-stamp"></span><h2 style="margin:0">封をしました</h2></div>
+ <p class="when" id="m-when"></p>
+ <h3>1. 期限の日をカレンダーに入れる</h3>
+ <button type="button" class="btn primary" id="m-ics">カレンダーに追加(.ics)</button>
+ <p class="note">期限の時刻に通知が来ます。予定のメモにカプセルのリンクが入っています。</p>
+ <h3>2. リンクか文字列を保管・共有する</h3>
+ <div class="row" style="margin-top:0">
+  <button type="button" class="btn sm" id="m-share">共有</button>
+  <button type="button" class="btn sm" id="m-copylink">リンクをコピー</button>
+  <button type="button" class="btn sm" id="m-copycode">文字列をコピー</button>
  </div>
+ <textarea class="code" id="m-code" readonly style="margin-top:10px" aria-label="カプセルの文字列"></textarea>
+ <p class="note">これが無いと開けません。別の端末でも、ホームの「みる」に貼れば開けます。中身は暗号なので、人に渡しても期限までは読まれません。</p>
+ <div class="row" style="margin-top:22px"><a class="btn sm" id="m-open" href="#">このカプセルを見る</a><a class="btn sm" href="#">ホームへ</a></div>
 </section>
 
 <!-- カプセル -->
 <section id="v-cap" class="hidden">
- <div class="card">
-  <div class="title" id="c-title"></div>
-  <p class="when" id="c-when"></p>
+ <a class="back" href="#">← ホームへ</a>
+ <div class="head"><span id="c-stamp"></span><div><div class="title" id="c-title"></div><p class="note" id="c-when" style="margin:0"></p></div></div>
 
-  <div id="c-locked">
-   <div class="lock" aria-hidden="true">🔒</div>
-   <p style="text-align:center;margin:0">開けられるまで あと</p>
-   <p class="cd" id="c-cd" style="text-align:center" aria-live="off"></p>
-   <p class="note" style="text-align:center">期限が来るまでは、誰も(作った人も)中身を読めません。</p>
-   <div class="row"><button type="button" class="sub" id="c-ics">カレンダーに追加(.ics)</button><button type="button" class="sub" id="c-copylink">リンクをコピー</button></div>
-  </div>
-
-  <div id="c-ready" class="hidden">
-   <div class="lock" aria-hidden="true">🔓</div>
-   <p class="big" style="text-align:center">期限が来ました</p>
-   <button type="button" class="main" id="c-open">開けて出題する</button>
-   <p class="note">公開ビーコン drand から、この回の署名を1回だけ取りに行きます。</p>
-  </div>
-
-  <div id="c-quiz" class="hidden">
-   <h2 style="margin-top:6px">問題</h2>
-   <div class="q" id="c-q"></div>
-   <p class="note" id="c-made"></p>
-   <label for="c-ans">あなたの答え</label>
-   <input id="c-ans" type="text" autocomplete="off" enterkeyhint="done">
-   <div class="row"><button type="button" class="main" id="c-check">答え合わせ</button></div>
-   <p class="result" id="c-res" aria-live="polite"></p>
-   <div class="row hidden" id="c-giveup-row"><button type="button" class="sub" id="c-giveup">あきらめて答えを見る</button></div>
-   <p class="q hidden" id="c-a"></p>
-  </div>
-  <p id="c-msg" class="warn" role="alert"></p>
+ <div id="c-locked">
+  <p class="when">開けられるまで あと</p>
+  <p class="cd" id="c-cd" aria-live="off"></p>
+  <p class="note">期限が来るまでは、誰も(作った人も)中身を読めません。</p>
+  <div class="row"><button type="button" class="btn sm" id="c-ics">カレンダーに追加(.ics)</button><button type="button" class="btn sm" id="c-copylink">リンクをコピー</button></div>
  </div>
- <div class="row"><a class="sub" href="#">トップへ</a></div>
+
+ <div id="c-ready" class="hidden">
+  <p class="when">期限が来ました</p>
+  <button type="button" class="btn primary" id="c-open" style="margin-top:14px">開けて出題する</button>
+  <p class="note">公開ビーコン drand から、この回の署名を1回だけ取りに行きます。</p>
+ </div>
+
+ <div id="c-quiz" class="hidden">
+  <h3 style="margin-top:16px">問題</h3>
+  <div class="q" id="c-q"></div>
+  <p class="note" id="c-made"></p>
+  <label for="c-ans">あなたの答え</label>
+  <input id="c-ans" type="text" autocomplete="off" enterkeyhint="done">
+  <button type="button" class="btn primary" id="c-check" style="margin-top:10px">答え合わせ</button>
+  <p class="result" id="c-res" aria-live="polite"></p>
+  <div class="row hidden" id="c-giveup-row"><button type="button" class="btn sm" id="c-giveup">あきらめて答えを見る</button></div>
+  <p class="a hidden" id="c-a"></p>
+ </div>
+ <p id="c-msg" class="warn" role="alert"></p>
 </section>
 </main>
 <div class="toast" id="toast"></div>
@@ -305,7 +322,7 @@ function makeIcs(c) {
     "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//mini-tools//timecapsule//JA", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
     "BEGIN:VEVENT", "UID:" + uid, "DTSTAMP:" + icsTime(Date.now()),
     "DTSTART:" + icsTime(at), "DTEND:" + icsTime(at + 30 * 60000),
-    "SUMMARY:" + icsEsc("🔓 開けられます: " + name),
+    "SUMMARY:" + icsEsc("開けられます: " + name),
     "DESCRIPTION:" + icsEsc("タイムカプセル問題の期限が来ました。下のリンクを開くと出題されます。\n" + link + "\n\nリンクが開けないときは、ページに次の文字列を貼り付けてください:\n" + c.code),
     "URL:" + link,
     "BEGIN:VALARM", "ACTION:DISPLAY", "TRIGGER:PT0S", "DESCRIPTION:" + icsEsc("開けられます: " + name), "END:VALARM",
@@ -323,14 +340,22 @@ function downloadIcs(c) {
 
 // ---- 画面切替 ----
 let timer = null;
-function show(id) { for (const v of ["v-home", "v-made", "v-cap"]) $(v).classList.toggle("hidden", v !== id); scrollTo(0, 0); }
+const VIEWS = ["v-home", "v-new", "v-open", "v-made", "v-cap"];
+function show(id) { for (const v of VIEWS) $(v).classList.toggle("hidden", v !== id); scrollTo(0, 0); }
 function route() {
   clearInterval(timer);
   const h = decodeURIComponent(location.hash.slice(1));
+  if (h === "new") return showNew();
+  if (h === "open") return showOpen();
   if (h.startsWith("made:")) { const c = parseCode(h.slice(5)); if (c) return showMade(c); }
   if (h) { const c = parseCode(h); if (c) return showCap(c); }
   showHome();
 }
+// 封印のハンコ(状態の表示に使う)
+function stampSvg(ch, cls, big) {
+  return `<svg class="stamp ${cls}${big ? " big" : ""}" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="20" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="22" cy="22" r="16.5" fill="none" stroke="currentColor" stroke-width=".8"/><text x="22" y="29.5" text-anchor="middle" font-size="21" font-weight="700" fill="currentColor" font-family="Shippori Mincho,Hiragino Mincho ProN,Yu Mincho,serif">${ch}</text></svg>`;
+}
+function setStamp(id, ch, cls, big) { $(id).innerHTML = stampSvg(ch, cls || "", big); }
 addEventListener("hashchange", route);
 
 // ---- ホーム ----
@@ -390,25 +415,35 @@ $("o-go").addEventListener("click", () => {
   $("o-in").value = ""; location.hash = c.code;
 });
 
+function showNew() { show("v-new"); updateWhen(); }
+function showOpen() { show("v-open"); $("o-in").focus(); }
+const rank = (it, now) => (it.solved || it.gaveup) ? 2 : it.at <= now ? 0 : 1;
 function showHome() {
-  show("v-home"); updateWhen();
+  show("v-home");
   const ul = $("mine"); ul.textContent = "";
-  const a = loadMine(); $("mine-empty").classList.toggle("hidden", a.length > 0);
   const now = Date.now();
+  const a = loadMine().slice().sort((x, y) => rank(x, now) - rank(y, now) || x.at - y.at);
+  $("mine-empty").classList.toggle("hidden", a.length > 0);
+  const ready = a.filter((it) => rank(it, now) === 0).length;
+  $("h-notice").classList.toggle("hidden", !ready);
+  $("h-notice").textContent = ready ? `開けられるカプセルが${ready}件あります` : "";
   for (const it of a) {
     const li = document.createElement("li");
     const link = document.createElement("a"); link.href = "#" + it.code;
+    const st = document.createElement("span");
+    const tx = document.createElement("span"); tx.className = "tx";
     const t = document.createElement("span"); t.className = "t"; t.textContent = it.title || "(表書きなし)";
-    const d = document.createElement("span"); d.className = "d"; d.textContent = fmtDate(it.at) + " に開封";
-    link.append(t, d);
-    const bd = document.createElement("span"); bd.className = "badge";
-    if (it.solved) { bd.className += " done"; bd.textContent = "正解"; }
-    else if (it.gaveup) { bd.className += " done"; bd.textContent = "開封済み"; }
-    else if (it.at <= now) { bd.className += " ready"; bd.textContent = "開けられます"; }
-    else bd.textContent = "あと" + fmtSpan(it.at - now).replace(/後$/, "");
-    const del = document.createElement("button"); del.className = "del"; del.type = "button"; del.textContent = "×"; del.setAttribute("aria-label", "一覧から消す");
+    const d = document.createElement("span"); d.className = "d"; d.textContent = fmtDate(it.at);
+    tx.append(t, d);
+    const s2 = document.createElement("span"); s2.className = "s";
+    if (it.solved) { st.innerHTML = stampSvg("正", "done"); s2.className += " done"; s2.textContent = "正解"; }
+    else if (it.gaveup) { st.innerHTML = stampSvg("済", "done"); s2.textContent = "開封済み"; }
+    else if (it.at <= now) { st.innerHTML = stampSvg("開", "ready"); s2.className += " ready"; s2.textContent = "開けられます"; }
+    else { st.innerHTML = stampSvg("封", ""); s2.textContent = "あと" + fmtSpan(it.at - now).replace(/後$/, ""); }
+    link.append(st, tx, s2);
+    const del = document.createElement("button"); del.className = "del"; del.type = "button"; del.textContent = "消す"; del.setAttribute("aria-label", (it.title || "このカプセル") + "を一覧から消す");
     del.addEventListener("click", () => { if (confirm("この端末の一覧から消しますか?\n(リンクや文字列があれば、また開けます)")) { saveMine(loadMine().filter((x) => x.code !== it.code)); showHome(); } });
-    li.append(link, bd, del); ul.append(li);
+    li.append(link, del); ul.append(li);
   }
 }
 
@@ -417,6 +452,7 @@ let cur = null;
 function showMade(c) {
   cur = c; show("v-made");
   $("m-when").textContent = `${fmtDate(unlockAt(c.round))} に開けられます(${fmtSpan(unlockAt(c.round) - Date.now())})`;
+  setStamp("m-stamp", "封", "", true);
   $("m-code").value = c.code; $("m-open").href = "#" + c.code;
   $("m-share").classList.toggle("hidden", !navigator.share);
 }
@@ -432,7 +468,7 @@ $("m-share").addEventListener("click", async () => {
 // ---- カプセル ----
 function showCap(c) {
   cur = c; show("v-cap"); remember(c);
-  $("c-title").textContent = c.title || "タイムカプセル問題";
+  $("c-title").textContent = c.title || "タイムカプセル問題"; setStamp("c-stamp", "封", "");
   $("c-when").textContent = fmtDate(unlockAt(c.round)) + " に開封";
   $("c-msg").textContent = "";
   for (const id of ["c-locked", "c-ready", "c-quiz"]) $(id).classList.add("hidden");
@@ -442,7 +478,7 @@ function showCap(c) {
   const tick = () => {
     const left = unlockAt(c.round) - Date.now();
     if (left > 0) { $("c-locked").classList.remove("hidden"); $("c-cd").textContent = fmtLeft(left); }
-    else { clearInterval(timer); $("c-locked").classList.add("hidden"); $("c-ready").classList.remove("hidden"); }
+    else { clearInterval(timer); $("c-locked").classList.add("hidden"); $("c-ready").classList.remove("hidden"); setStamp("c-stamp", "開", "ready"); }
   };
   tick(); timer = setInterval(tick, 1000);
 }
@@ -456,7 +492,7 @@ $("c-open").addEventListener("click", async () => {
     const out = await TL.timelockDecrypt(latin1(cur.age), client);
     plain = JSON.parse(dec.decode(out));
     misses = 0;
-    $("c-ready").classList.add("hidden"); $("c-quiz").classList.remove("hidden");
+    $("c-ready").classList.add("hidden"); $("c-quiz").classList.remove("hidden"); setStamp("c-stamp", "開", "ready");
     if (plain.t) $("c-title").textContent = plain.t;
     $("c-q").textContent = plain.q;
     $("c-made").textContent = plain.c ? `出題: ${fmtDate(plain.c)}(${fmtSpan(unlockAt(cur.round) - plain.c).replace(/後$/, "")}前の問題)` : "";
@@ -472,6 +508,7 @@ $("c-open").addEventListener("click", async () => {
   } finally { btn.disabled = false; btn.textContent = "開けて出題する"; }
 });
 function revealAnswer(ok) {
+  setStamp("c-stamp", ok ? "正" : "済", "done");
   $("c-a").textContent = "正解: " + plain.a; $("c-a").classList.remove("hidden"); $("c-giveup-row").classList.add("hidden");
   if (ok) { $("c-res").textContent = "正解！"; $("c-res").className = "result ok"; }
 }
@@ -519,7 +556,6 @@ function celebrate() {
   })(t0);
 }
 
-$("home").addEventListener("click", (e) => { e.preventDefault(); history.pushState("", "", location.pathname + location.search); route(); });
 route();
 </script>
 </body>
