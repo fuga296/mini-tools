@@ -3,88 +3,83 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#fafaf7">
+<meta name="theme-color" content="#1f2328">
 <title>fuckalendar</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{--bg:#fafaf7;--card:#fff;--ink:#1f2328;--sub:#6b7078;--line:#e3e3dc;--chip:#f0f0ea;--red:#d33;--blue:#2563eb;--accent:#111;--hol:#fff1f1;--today:#fde047}
-@media (prefers-color-scheme:dark){:root{--bg:#151618;--card:#1e2023;--ink:#e8e8e3;--sub:#9aa0a6;--line:#33363a;--chip:#2a2d31;--red:#f87171;--blue:#60a5fa;--accent:#e8e8e3;--hol:#3a2224;--today:#a16207}}
-html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif}
-main{max-width:620px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 30px)}
-h1{font-size:22px;margin:4px 0 0;letter-spacing:.02em}
-.lead{color:var(--sub);font-size:13px;margin:2px 0 12px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}
-.lv{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-button{font:inherit;font-size:14px;border-radius:10px;border:1px solid var(--line);background:var(--chip);color:var(--ink);padding:8px 10px;cursor:pointer}
-.lv button{padding:8px 0;line-height:1.2}
-.lv button small{display:block;font-size:10px;color:var(--sub)}
-.lv button[aria-pressed=true]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
-.lv button[aria-pressed=true] small{color:var(--bg);opacity:.75}
-.seedrow{display:flex;gap:8px;margin-top:10px;align-items:center}
-.seedrow label{font-size:12px;color:var(--sub);white-space:nowrap}
-input[type=text]{flex:1;min-width:0;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-family:ui-monospace,Menlo,monospace}
+:root{--bg:#fafaf7;--ink:#1f2328;--sub:#6b7078;--line:#dcdcd4;--chip:#f0f0ea;--red:#d33;--blue:#2563eb;--accent:#1f2328;--onacc:#fff;--hol:#fff1f1;--today:#eab308;--r:3px}
+@media (prefers-color-scheme:dark){:root{--bg:#151618;--ink:#e8e8e3;--sub:#9aa0a6;--line:#33363a;--chip:#2a2d31;--red:#f87171;--blue:#60a5fa;--accent:#e8e8e3;--onacc:#151618;--hol:#3a2224;--today:#ca8a04}}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",Meiryo,"Noto Sans JP",sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--accent);color:var(--onacc);padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+header h1{font-size:18px;margin:0;letter-spacing:.04em}
+header .hb{display:flex;gap:6px}
+header button{background:transparent;border:1px solid currentColor;color:inherit;padding:4px 10px;font-size:13px}
+main{max-width:620px;margin:0 auto;padding:16px 16px calc(env(safe-area-inset-bottom) + 30px)}
+button{font:inherit;font-size:14px;border-radius:var(--r);border:1px solid var(--line);background:var(--chip);color:var(--ink);padding:8px 12px;cursor:pointer}
+.hidden{display:none!important}
+.start{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.lv{display:flex;gap:8px}
+.lv button{width:48px;height:48px;font-size:20px;font-weight:700;padding:0}
+.lv button[aria-pressed=true]{background:var(--accent);color:var(--onacc);border-color:var(--accent)}
+.go{width:100%;max-width:280px;padding:13px;font-size:17px;font-weight:700;background:var(--accent);color:var(--onacc);border-color:var(--accent)}
+.link{background:none;border:0;color:var(--sub);font-size:12px;text-decoration:underline;padding:4px 8px}
+.seedbox{display:flex;gap:8px;width:100%;max-width:280px}
+input[type=text]{flex:1;min-width:0;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:var(--r);background:var(--bg);color:var(--ink);font-family:inherit}
 .year{text-align:center;font-size:13px;color:var(--sub);margin:0}
 .nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0 10px}
 .nav button{width:44px;height:40px;font-size:20px;padding:0}
 .mname{font-size:24px;font-weight:800;text-align:center;line-height:1.2}
-.mname small{display:block;font-size:11px;color:var(--sub);font-weight:400}
-.grid{display:grid;gap:3px}
+.grid{display:grid;gap:2px}
 .wd{font-size:12px;text-align:center;font-weight:700;padding:4px 0;color:var(--sub)}
 .c-red{color:var(--red)!important}.c-blue{color:var(--blue)!important}
-.cell{aspect-ratio:1/1.05;border-radius:8px;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;position:relative;overflow:hidden;min-width:0;padding:1px;text-align:center;line-height:1.1;word-break:break-all}
+.cell{aspect-ratio:1/1.05;border-radius:var(--r);background:var(--chip);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;overflow:hidden;min-width:0;padding:1px;text-align:center;line-height:1.1;word-break:break-all}
 .cell.empty{background:transparent}
 .cell.hol{background:var(--hol);color:var(--red)}
-.cell.hole{color:var(--sub);font-weight:400}
+.cell.hole{color:var(--sub);font-weight:400;background:transparent;border:1px dashed var(--line)}
 .cell.today{outline:2px solid var(--today);outline-offset:-2px}
 .cell .tag{font-size:8px;font-weight:400;color:var(--sub);margin-top:1px;white-space:nowrap}
-.hols{font-size:13px;margin:10px 0 0;padding-left:1.2em;color:var(--sub)}
+.hols{font-size:13px;margin:12px 0 0;padding-left:1.2em;color:var(--sub)}
 .hols b{color:var(--red);font-weight:600}
-.row{display:flex;gap:8px;flex-wrap:wrap}
+.row{display:flex;gap:8px;margin-top:14px}
 .row button{flex:1}
-.year-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
-.mini{border:1px solid var(--line);border-radius:10px;padding:6px;cursor:pointer;background:var(--card)}
+.year-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-top:10px}
+.mini{border-top:1px solid var(--line);padding-top:4px;cursor:pointer}
 .mini h3{font-size:13px;margin:0 0 4px;text-align:center}
 .mini .grid{gap:1px}
 .mini .wd{font-size:8px;padding:0}
-.mini .cell{font-size:8px;border-radius:3px;aspect-ratio:auto;height:14px;font-weight:400}
+.mini .cell{font-size:8px;aspect-ratio:auto;height:14px;font-weight:400;background:transparent}
+.mini .cell.hol{background:var(--hol)}
 .mini .cell .tag{display:none}
-details{font-size:13px}
-details summary{cursor:pointer;color:var(--sub)}
-details ol{padding-left:1.4em;margin:8px 0 0}
-details li.off{color:var(--sub);opacity:.5}
-.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 20px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 20px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:var(--r);font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
-.hidden{display:none!important}
 </style>
 </head>
 <body>
-<main>
+<header>
  <h1>fuckalendar</h1>
- <p class="lead">嘘のカレンダー。レベルが上がるほど嘘が増えます。</p>
-
- <div class="card">
+ <div class="hb hidden" id="hb"><button id="copy" type="button">共有</button><button id="home" type="button">最初へ</button></div>
+</header>
+<main>
+ <section class="start" id="start">
   <div class="lv" id="lv" role="group" aria-label="レベル"></div>
-  <div class="seedrow"><label for="seed">シード</label><input id="seed" type="text" autocomplete="off" spellcheck="false" maxlength="40"><button id="reroll" type="button" aria-label="新しいシード">🎲</button></div>
- </div>
+  <button class="go" id="go" type="button">はじめる</button>
+  <button class="link" id="seedLink" type="button">シードを指定する</button>
+  <div class="seedbox hidden" id="seedBox"><input id="seed" type="text" autocomplete="off" spellcheck="false" maxlength="40" placeholder="シード" aria-label="シード"></div>
+ </section>
 
- <div class="card" id="monthView">
+ <section id="monthView" class="hidden">
   <p class="year" id="year"></p>
   <div class="nav"><button id="prev" type="button" aria-label="前の月">‹</button><div class="mname" id="mname"></div><button id="next" type="button" aria-label="次の月">›</button></div>
   <div id="grid"></div>
   <ul class="hols" id="hols"></ul>
- </div>
+  <div class="row"><button id="toggleView" type="button">1年ぶん表示</button></div>
+ </section>
 
- <div class="card hidden" id="yearView">
-  <p class="year" id="year2" style="margin-bottom:8px"></p>
+ <section id="yearView" class="hidden">
+  <p class="year" id="year2"></p>
   <div class="year-grid" id="ygrid"></div>
- </div>
-
- <div class="row">
-  <button id="toggleView" type="button">1年ぶん表示</button>
-  <button id="copy" type="button">URLをコピー</button>
- </div>
-
- <div class="card"><details><summary>このレベルで使っている嘘</summary><ol id="methods"></ol></details></div>
+  <div class="row"><button id="toggleView2" type="button">1か月ずつ表示</button></div>
+ </section>
 </main>
 <div class="toast" id="toast"></div>
 <script>
@@ -112,7 +107,6 @@ var CONFIG={
  monthWeekdayProb:0.5,     // Lv5: 月ごとに曜日の並びが変わる確率
  todayCount:[0,4]          // Lv5: 「今日」の数(年全体)
 };
-var LEVEL_NAMES=["ずれ","水増し","異世界","崩壊","混沌"];
 // 嘘の方法の一覧([導入レベル, 名前])
 var METHODS=[
  [1,"曜日をずらす(1日目の曜日がずれている)"],
@@ -221,9 +215,9 @@ function label(c){if(c.hole)return "欠";return c.f!==undefined?FORMATS[c.f](c.n
 
 // ===== 表示 =====
 var $=function(i){return document.getElementById(i);};
-var st={seed:"",lv:1,m:0,year:false},cal=null;
+var st={seed:"",lv:1,m:0,year:false,open:false},cal=null;
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
-function gridHtml(mo,mini){
+function gridHtml(mo){
  var wd=mo.weekdays||cal.weekdays,W=cal.weekLen,h='<div class="grid" style="grid-template-columns:repeat('+W+',minmax(0,1fr))">';
  wd.forEach(function(w){h+='<div class="wd '+w.c+'">'+esc(w.n)+'</div>';});
  for(var i=0;i<mo.start;i++)h+='<div class="cell empty"></div>';
@@ -233,40 +227,45 @@ function gridHtml(mo,mini){
   h+='<div class="'+cls+(c.hol||c.hole?"":" "+col)+'"'+(c.hol?' title="'+esc(c.hol)+'"':'')+'>'+esc(label(c))+(tag?'<span class="tag">'+tag+'</span>':'')+'</div>';});
  return h+'</div>';
 }
+function shareUrl(){var u=new URL(location.href);u.search="";u.hash="";u.searchParams.set("seed",st.seed);u.searchParams.set("lv",st.lv);if(st.m)u.searchParams.set("m",st.m+1);return u.toString();}
 function render(){
+ ["start","monthView","yearView"].forEach(function(k){$(k).classList.add("hidden");});
+ $("hb").classList.toggle("hidden",!st.open);
+ if(!st.open){$("start").classList.remove("hidden");return;}
  cal=generate(st.seed,st.lv);if(st.m>=cal.months.length)st.m=cal.months.length-1;if(st.m<0)st.m=0;
- Array.prototype.forEach.call($("lv").children,function(b,i){b.setAttribute("aria-pressed",String(i+1===st.lv));});
  $("year").textContent=$("year2").textContent=cal.yearLabel;
  var mo=cal.months[st.m];
- $("mname").innerHTML=esc(mo.name)+'<small>'+(st.m+1)+' / '+cal.months.length+'か月目 ・ '+mo.cells.length+'マス'+(mo.reversed?' ・ 逆行中':'')+'</small>';
+ $("mname").textContent=mo.name;
  $("grid").innerHTML=gridHtml(mo);
  var hs=mo.cells.filter(function(c){return c.hol;});
  var todays=cal.months.reduce(function(a,x){return a+x.cells.filter(function(c){return c.today;}).length;},0);
  $("hols").innerHTML=hs.map(function(c){return '<li><b>'+esc(label(c))+'</b> '+esc(c.hol)+'</li>';}).join("")+
   (st.lv>=5&&todays===0?'<li>今日は今年のどこにもありません。</li>':'')+(st.lv>=5&&todays>1?'<li>今年は今日が'+todays+'回あります。</li>':'');
- $("ygrid").innerHTML=cal.months.map(function(x,i){return '<div class="mini" data-m="'+i+'"><h3>'+esc(x.name)+'</h3>'+gridHtml(x,true)+'</div>';}).join("");
- $("monthView").classList.toggle("hidden",st.year);$("yearView").classList.toggle("hidden",!st.year);
- $("toggleView").textContent=st.year?"1か月ずつ表示":"1年ぶん表示";
- $("methods").innerHTML=METHODS.map(function(x){return '<li class="'+(x[0]<=st.lv?"":"off")+'">'+esc(x[1])+' <small>(Lv'+x[0]+'〜)</small></li>';}).join("");
+ $("hols").classList.toggle("hidden",!$("hols").innerHTML);
+ $("ygrid").innerHTML=cal.months.map(function(x,i){return '<div class="mini" data-m="'+i+'"><h3>'+esc(x.name)+'</h3>'+gridHtml(x)+'</div>';}).join("");
+ $(st.year?"yearView":"monthView").classList.remove("hidden");
  try{history.replaceState(null,"",shareUrl());}catch(e){}
 }
-function shareUrl(){var u=new URL(location.href);u.search="";u.hash="";u.searchParams.set("seed",st.seed);u.searchParams.set("lv",st.lv);if(st.m)u.searchParams.set("m",st.m+1);return u.toString();}
 function toast(t){var el=$("toast");el.textContent=t;el.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(function(){el.classList.remove("on");},1800);}
+function openCal(seed){st.seed=(seed||"").trim().slice(0,40)||newSeed();st.m=0;st.year=false;st.open=true;render();scrollTo(0,0);}
 
-LEVEL_NAMES.forEach(function(n,i){var b=document.createElement("button");b.type="button";b.innerHTML="Lv"+(i+1)+"<small>"+n+"</small>";
- b.onclick=function(){st.lv=i+1;render();};$("lv").appendChild(b);});
-$("seed").addEventListener("input",function(){var s=$("seed").value.trim().slice(0,40);if(s){st.seed=s;render();}});
-$("reroll").onclick=function(){st.seed=$("seed").value=newSeed();st.m=0;render();};
+for(var i=1;i<=CONFIG.maxLevel;i++)(function(n){var b=document.createElement("button");b.type="button";b.textContent=n;b.setAttribute("aria-pressed",String(n===st.lv));
+ b.onclick=function(){st.lv=n;Array.prototype.forEach.call($("lv").children,function(x,k){x.setAttribute("aria-pressed",String(k+1===n));});};$("lv").appendChild(b);})(i);
+$("go").onclick=function(){openCal($("seed").value);};
+$("seedLink").onclick=function(){$("seedBox").classList.toggle("hidden");$("seed").focus();};
+$("seed").addEventListener("keydown",function(e){if(e.key==="Enter")$("go").click();});
 $("prev").onclick=function(){st.m=(st.m-1+cal.months.length)%cal.months.length;render();};
 $("next").onclick=function(){st.m=(st.m+1)%cal.months.length;render();};
-$("toggleView").onclick=function(){st.year=!st.year;render();};
+$("toggleView").onclick=$("toggleView2").onclick=function(){st.year=!st.year;render();scrollTo(0,0);};
 $("ygrid").onclick=function(e){var el=e.target.closest(".mini");if(!el)return;st.m=+el.dataset.m;st.year=false;render();scrollTo(0,0);};
-$("copy").onclick=function(){var u=shareUrl();(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){toast("コピーしました");},function(){prompt("このURLをコピーしてください",u);});};
-(function(){var q=new URLSearchParams(location.search);
- st.seed=(q.get("seed")||"").trim().slice(0,40)||newSeed();
- var lv=parseInt(q.get("lv"),10);st.lv=lv>=1&&lv<=CONFIG.maxLevel?lv:1;
- var m=parseInt(q.get("m"),10);st.m=m>=1?m-1:0;
- $("seed").value=st.seed;render();})();
+$("copy").onclick=function(){var u=shareUrl();
+ if(navigator.share){navigator.share({title:"fuckalendar",url:u}).catch(function(){});return;}
+ (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){toast("URLをコピーしました");},function(){prompt("このURLをコピーしてください",u);});};
+$("home").onclick=function(){st.open=false;try{history.replaceState(null,"",location.pathname);}catch(e){}render();};
+(function(){var q=new URLSearchParams(location.search),seed=(q.get("seed")||"").trim().slice(0,40);
+ var lv=parseInt(q.get("lv"),10);if(lv>=1&&lv<=CONFIG.maxLevel){st.lv=lv;Array.prototype.forEach.call($("lv").children,function(x,k){x.setAttribute("aria-pressed",String(k+1===lv));});}
+ if(seed){$("seed").value=seed;if(lv>=1&&lv<=CONFIG.maxLevel){var m=parseInt(q.get("m"),10);st.seed=seed;st.m=m>=1?m-1:0;st.open=true;}}
+ render();})();
 </script>
 </body>
 </html>
