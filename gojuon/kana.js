@@ -48,14 +48,13 @@
     col('w', 'わ', 'わ・・・を')
   ];
 
-  // 歴史的仮名(古い表記)。level: 'some' は「一部」で入る、'all' は「全部」でだけ入る
+  // 歴史的仮名(古い表記)。flag の設定が 'yes' のものだけ表に入る
   var ARCHAIC = [
-    { col: 'w', dan: 1, id: 'w1', h: 'ゐ', level: 'some' },
-    { col: 'w', dan: 3, id: 'w3', h: 'ゑ', level: 'some' },
-    { col: 'y', dan: 3, id: 'y3', h: '\u{1B001}', level: 'all' }, // や行え 𛀁
-    { col: 'w', dan: 2, id: 'w2', h: '\u{1B11F}', level: 'all' }  // わ行う 𛄟
+    { col: 'w', dan: 1, id: 'w1', h: 'ゐ', flag: 'wi' },
+    { col: 'w', dan: 3, id: 'w3', h: 'ゑ', flag: 'we' },
+    { col: 'y', dan: 3, id: 'y3', h: '\u{1B001}', flag: 'ye' }, // や行え 𛀁
+    { col: 'w', dan: 2, id: 'w2', h: '\u{1B11F}', flag: 'wu' }  // わ行う 𛄟
   ];
-  var ARCHAIC_LABEL = { none: 'なし', some: '一部(ゐ・ゑ)', all: '全部(ゐ・ゑ・や行え・わ行う)' };
 
   var DAKUON = [
     col('g', 'が', 'がぎぐげご'),
@@ -107,10 +106,21 @@
   ];
 
   // 既定 = 一般的な五十音表(清音 46 字、ん は わ行の次の列の上、ゐ・ゑ なし)
+  // いろは順の標準的な設定(いろは歌は 47 字で、ゐ・ゑ を含み ん を含まない)
+  var PRESETS = {
+    gojuon: { order: 'gojuon', n: 'col-top', wi: 'no', we: 'no' },
+    iroha: { order: 'iroha', n: 'none', wi: 'yes', we: 'yes' }
+  };
+  var ORDERS = { gojuon: '五十音順', iroha: 'いろは順' };
+  var IROHA = 'いろはにほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせす';
+  var KANJI_NUM = '一二三四五六七八九十';
   var DEFAULTS = {
     n: 'col-top',
-    archaic: 'none',
+    order: 'gojuon',    // 'gojuon' 五十音順 / 'iroha' いろは順
+    irohaW: 7,          // いろは順の 1 行の字数
     wo: 'yes',          // 'yes' 「を」を入れる / 'no' 入れない
+    wi: 'no', we: 'no', // 「ゐ」「ゑ」を入れる('yes')か
+    ye: 'no', wu: 'no', // や行え(𛀁)・わ行う(𛄟)を入れる('yes')か
     gapFill: 'blank',   // 'blank' 空欄 / 'dup' あ行の字を薄く表示
     dakuon: 'none', handakuon: 'none', vu: 'none', small: 'none', youon: 'none'
   };
@@ -149,16 +159,21 @@
    * cells の要素は { id, h } / { filler:'い' }(薄く表示する飾り) / null(空欄)
    */
   function build(options) {
-    var o = Object.assign({}, DEFAULTS, options || {});
-    var lv = o.archaic === 'all' ? 2 : o.archaic === 'some' ? 1 : 0;
+    var opt = Object.assign({}, options || {});
+    // 古い設定(archaic: 'some' | 'all')も読めるようにする
+    if (opt.archaic && opt.wi === undefined) {
+      var lv = opt.archaic === 'all' ? 2 : opt.archaic === 'some' ? 1 : 0;
+      opt.wi = opt.we = lv >= 1 ? 'yes' : 'no';
+      opt.ye = opt.wu = lv >= 2 ? 'yes' : 'no';
+    }
+    var o = Object.assign({}, DEFAULTS, opt);
     var main = SEION.map(cloneCol);
     var byId = {};
     main.forEach(function (c) { byId[c.id] = c; });
     ARCHAIC.forEach(function (a) {
-      if ((a.level === 'some' && lv >= 1) || (a.level === 'all' && lv >= 2))
-        byId[a.col].cells[a.dan] = { id: a.id, h: a.h, archaic: true };
+      if (o[a.flag] === 'yes') byId[a.col].cells[a.dan] = { id: a.id, h: a.h, archaic: true };
     });
-    if (o.gapFill === 'dup') {
+    if (o.gapFill === 'dup' && o.order !== 'iroha') {
       ['y', 'w'].forEach(function (cid) {
         byId[cid].cells.forEach(function (c, d) {
           if (!c) byId[cid].cells[d] = { filler: DAN[d] };
@@ -166,24 +181,46 @@
       });
     }
     if (o.wo === 'no') byId.w.cells[4] = null;
-    var tables = [];
-    var nPos = { 'col-top': 0, 'col-mid': 2, 'col-bottom': 4 }[o.n];
-    if (nPos !== undefined) {
-      var nc = { id: 'nn', label: 'ん', cells: [null, null, null, null, null] };
-      nc.cells[nPos] = { id: 'nn', h: 'ん' };
-      main.push(nc);
-    }
-    var mainTable = { id: 'main', title: '五十音', cols: main, dans: [0, 1, 2, 3, 4] };
-    tables.push(mainTable);
-    if (o.n === 'outside') {
-      var only = { id: 'nn', label: 'ん', cells: [{ id: 'nn', h: 'ん' }, null, null, null, null] };
-      tables.push({ id: 'n', title: '「ん」', cols: [only], dans: [0] });
+    var tables = [], mainTable;
+    var nn = { id: 'nn', h: 'ん' };
+    if (o.order === 'iroha') {
+      // 清音の全マスを字で引けるようにして、いろは歌の順に並べる
+      var byH = {};
+      main.forEach(function (c) { c.cells.forEach(function (x) { if (x && !x.filler) byH[x.h] = x; }); });
+      var seq = Array.from(IROHA).map(function (h) { return byH[h]; }).filter(Boolean);
+      if (o.n !== 'none' && o.n !== 'outside') seq.push(nn);
+      var W = Math.max(2, Math.min(16, parseInt(o.irohaW, 10) || 7)), lines = [];
+      for (var i = 0; i < seq.length; i += W) {
+        var cells = seq.slice(i, i + W);
+        while (cells.length < W) cells.push(null);
+        var li = i / W;
+        lines.push({ id: 'i' + li, label: KANJI_NUM[li] || String(li + 1), cells: cells });
+      }
+      var dans = []; for (var k = 0; k < W; k++) dans.push(k);
+      mainTable = { id: 'main', title: 'いろは', cols: lines, dans: dans,
+        danLabels: dans.map(function (k) { return String(k + 1); }) };
+      tables.push(mainTable);
+      if (o.n === 'outside') tables.push({ id: 'n', title: '「ん」', cols: [{ id: 'nn', label: 'ん', cells: [nn] }], dans: [0] });
+    } else {
+      var nPos = { 'col-top': 0, 'col-mid': 2, 'col-bottom': 4 }[o.n];
+      if (nPos !== undefined) {
+        var nc = { id: 'nn', label: 'ん', cells: [null, null, null, null, null] };
+        nc.cells[nPos] = nn;
+        main.push(nc);
+      }
+      mainTable = { id: 'main', title: '五十音', cols: main, dans: [0, 1, 2, 3, 4] };
+      tables.push(mainTable);
+      if (o.n === 'outside') {
+        var only = { id: 'nn', label: 'ん', cells: [nn, null, null, null, null] };
+        tables.push({ id: 'n', title: '「ん」', cols: [only], dans: [0] });
+      }
     }
     GROUPS.forEach(function (g) {
       var place = o[g.key];
       if (!place || place === 'none') return;
       var cols = groupCols(g.key, o).map(cloneCol);
-      if (place === 'main') mainTable.cols = mainTable.cols.concat(cols);
+      // いろは順の表には 5 段の列を続けられないので、別の表にする
+      if (place === 'main' && o.order !== 'iroha') mainTable.cols = mainTable.cols.concat(cols);
       else tables.push({ id: g.key, title: g.title, cols: cols, dans: compact(cols) });
     });
     return { options: o, tables: tables };
@@ -227,8 +264,52 @@
   function isHiragana(ch) { var c = ch.codePointAt(0); return (c >= 0x3041 && c <= 0x309F) || ch === '\u{1B001}' || ch === '\u{1B11F}'; }
   function isKatakana(ch) { var c = ch.codePointAt(0); return (c >= 0x30A0 && c <= 0x30FF) || (c >= 0x1B120 && c <= 0x1B122) || c === 0x1B000; }
 
-  // 表記: script は 'hira' | 'kata'
-  function display(h, script) { return script === 'kata' ? toKatakana(h) : h; }
+  // 漢字: 各かなの代表の漢字(かなのもとになった字を中心に、あ行は 亜以宇江於)
+  var KANJI = {};
+  (function () {
+    var rows = { a: '亜以宇江於', k: '加幾久計己', s: '左之寸世曽', t: '太知津天止', n: '奈仁奴祢乃',
+      h: '波比不部保', m: '万美武女毛', y: '也・由・与', r: '良利留礼呂', w: '和為・恵遠' };
+    SEION.forEach(function (c) {
+      var five = Array.from(rows[c.id]);
+      c.cells.forEach(function (x, d) { if (x && five[d] !== '・') KANJI[x.h] = five[d]; });
+    });
+    KANJI['ゐ'] = '為'; KANJI['ゑ'] = '恵'; KANJI['ん'] = '无';
+  })();
+
+  // ローマ字(ヘボン式をもとに、入力しやすいつづり)
+  var ROMA = {};
+  (function () {
+    var cons = { a: '', k: 'k', s: 's', t: 't', n: 'n', h: 'h', m: 'm', y: 'y', r: 'r', w: 'w', g: 'g', z: 'z', d: 'd', b: 'b', p: 'p', v: 'v' };
+    var irr = { si: 'shi', ti: 'chi', tu: 'tsu', hu: 'fu', zi: 'ji', di: 'ji', du: 'zu' };
+    var you = { ky: 'ky', sy: 'sh', ty: 'ch', ny: 'ny', hy: 'hy', my: 'my', ry: 'ry', gy: 'gy', jy: 'j', by: 'by', py: 'py' };
+    var smallRoma = { xa: ['xa', 'xi', 'xu', 'xe', 'xo'], xk: ['xka', , , 'xke'], xt: [, , 'xtu'], xy: ['xya', , 'xyu', , 'xyo'], xw: ['xwa'] };
+    function rom(cid, d) {
+      var v = 'aiueo'[d];
+      if (cid === 'nn') return 'n';
+      if (smallRoma[cid]) return smallRoma[cid][d];
+      if (you[cid]) return you[cid] + v;
+      var r = (cons[cid] || '') + v;
+      return irr[r] || r;
+    }
+    [SEION, DAKUON, HANDAKUON, VU, SMALL, YOUON_SEI, YOUON_DAKU, YOUON_HAN].forEach(function (list) {
+      list.forEach(function (c) { c.cells.forEach(function (x, d) { if (x) ROMA[x.h] = rom(c.id, d); }); });
+    });
+    ARCHAIC.forEach(function (a) { ROMA[a.h] = rom(a.col, a.dan); });
+    ROMA['ん'] = 'n';
+  })();
+
+  function toKanji(s) { return KANJI[s] || s; }
+  function toRomaji(s) { return ROMA[s] || s; }
+
+  // 表記: script は 'hira' | 'kata' | 'kanji' | 'romaji'
+  // 漢字・ローマ字にできない字(濁音の漢字など)は、ひらがなのまま返す
+  function display(h, script) {
+    if (script === 'kata') return toKatakana(h);
+    if (script === 'kanji') return toKanji(h);
+    if (script === 'romaji') return toRomaji(h);
+    return h;
+  }
+  var SCRIPTS = { hira: 'ひらがな', kata: 'カタカナ', kanji: '漢字', romaji: 'ローマ字' };
 
   // 文字列を「1 マス単位」に切る(きゃ のように小書きの ゃゅょぁぃぅぇぉゎ は前の字とまとめる)
   var COMBINING_SMALL = 'ゃゅょぁぃぅぇぉゎャュョァィゥェォヮ';
@@ -314,11 +395,11 @@
 
   return {
     DAN: DAN, DEFAULTS: DEFAULTS, N_PLACES: N_PLACES, PLACES: PLACES, GROUPS: GROUPS,
-    ARCHAIC_LABEL: ARCHAIC_LABEL,
     data: { SEION: SEION, ARCHAIC: ARCHAIC, DAKUON: DAKUON, HANDAKUON: HANDAKUON, VU: VU,
             SMALL: SMALL, YOUON_SEI: YOUON_SEI, YOUON_DAKU: YOUON_DAKU, YOUON_HAN: YOUON_HAN },
     build: build, cellsOf: cellsOf,
     toKatakana: toKatakana, toHiragana: toHiragana, isHiragana: isHiragana, isKatakana: isKatakana,
+    SCRIPTS: SCRIPTS, ORDERS: ORDERS, PRESETS: PRESETS, toKanji: toKanji, toRomaji: toRomaji,
     display: display, splitUnits: splitUnits, variants: variants, baseOf: baseOf,
     shuffle: shuffle, sample: sample, makeDeck: makeDeck
   };
