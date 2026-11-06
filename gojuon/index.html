@@ -174,10 +174,19 @@ dialog form{text-align:right;margin-top:12px}
 
 <dialog id="dlg"><div id="dlgBody"></div><form method="dialog"><button class="ib">閉じる</button></form></dialog>
 
-<script src="kana.js"></script>
+<script src="kana.js?v=3"></script>
 <script>
 'use strict';
+// 画面を表示できないときは、理由を画面に出す(古い kana.js が残っている場合など)
+function fail(msg) {
+  var d = document.createElement('div');
+  d.style.cssText = 'margin:16px;padding:12px;border:1px solid #a23b28;background:#fffdf8;color:#211d17';
+  d.textContent = msg + ' ページを再読み込み(キャッシュの削除)してください。';
+  document.body.insertBefore(d, document.body.children[1]);
+}
+window.addEventListener('error', function (e) { if (/kana\.js/.test(e.message)) return; fail('表示でエラーが起きました(' + e.message + ')。'); });
 var G = window.Gojuon;
+if (!G || !G.SCRIPTS || !G.PRESETS) { fail('kana.js が読み込めないか、古いままです。'); throw new Error('kana.js'); }
 var KEY = 'gojuon-iroha:v1';
 
 /* ---------- 既定値(すべて設定ページで変えられる) ---------- */
