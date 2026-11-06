@@ -226,6 +226,12 @@ function load() {
       ['layout', 'design', 'rnd', 'game'].forEach(function (k) { if (d[k]) Object.assign(s[k], d[k]); });
     }
   } catch (e) {}
+  if (s.layout.archaic) { // 古い保存形式(ゐゑ の 3 択)から移す
+    var lv = s.layout.archaic === 'all' ? 2 : s.layout.archaic === 'some' ? 1 : 0;
+    s.layout.wi = s.layout.we = lv >= 1 ? 'yes' : 'no'; s.layout.ye = s.layout.wu = lv >= 2 ? 'yes' : 'no';
+  }
+  delete s.layout.archaic;
+  if (!G.SCRIPTS[s.design.script]) s.design.script = 'hira';
   if (!PAGES[s.page]) s.page = 'table';
   if (!CHECKS[s.check]) s.check = 'mark';
   if (!PLAYS[s.play]) s.play = 'kuji';
@@ -240,6 +246,8 @@ document.addEventListener('visibilitychange', function () { if (document.hidden)
 
 function $(id) { return document.getElementById(id); }
 function disp(h) { return G.display(h, S.design.script); }
+// 札はひらがな/カタカナだけで表示(漢字・ローマ字にしない)
+function dispCard(h) { return G.display(h, S.design.script === 'kata' ? 'kata' : 'hira'); }
 function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 function fontOf(d) {
   return d.font === 'custom' && d.customFont ? '"' + d.customFont.replace(/["\\]/g, '') + '",' + FONTS.klee : (FONTS[d.font] || FONTS.klee);
@@ -338,11 +346,11 @@ function renderBoard(printW) {
     }
     if (L) {
       t.cols.forEach(function (c, ci) {
-        var e = lab(disp(c.label));
+        var e = lab(t.danLabels ? c.label : disp(c.label));
         if (d.dir === 'yoko') M[ci + 1][0] = e; else M[0][pos(ci, 0)[0]] = e;
       });
       t.dans.forEach(function (dn, di) {
-        var e = lab(disp(G.DAN[dn]));
+        var e = lab(t.danLabels ? t.danLabels[dn] : disp(G.DAN[dn]));
         if (d.dir === 'yoko') M[0][di + 1] = e; else M[di + 1][d.dir === 'tate-rtl' ? nc : 0] = e;
       });
     }
@@ -354,7 +362,12 @@ function renderBoard(printW) {
         else {
           var s = disp(x.h), label = s;
           e.textContent = s; e.dataset.id = x.id;
-          if (Array.from(s).length > 1) e.classList.add('two');
+          var len = Array.from(s).length;
+          if (len > 1) {
+            // 拗音は 2 字を並べ、ローマ字は字数に応じて縮める
+            if (/^[\x20-\x7e]+$/.test(s)) e.style.fontSize = Math.min(Math.round(cell * d.charPct / 100), Math.floor(cell * 1.5 / len)) + 'px';
+            else e.classList.add('two');
+          }
           if (mode === 'mark' && S.marks[x.id]) { e.classList.add('on'); label += '(黒塗り)'; }
           if (mode === 'pick' && S.rnd.picked[x.id]) { e.classList.add('sel'); label += '(選択中)'; }
           if (mode === 'count') {
@@ -395,9 +408,10 @@ var rT; window.addEventListener('resize', function () { clearTimeout(rT); rT = s
 function renderTools() {
   var c = $('tools'); c.innerHTML = '';
   var all = G.cellsOf(built);
+  function scriptSel() { return dropdown(G.SCRIPTS, S.design.script, function (v) { S.design.script = v; save(); render(); }, '表記'); }
   function common() {
     c.appendChild(el('span', 'sp'));
-    c.appendChild(btn('<span style="font:600 15px var(--kana)">あ/ア</span>', function () { S.design.script = S.design.script === 'hira' ? 'kata' : 'hira'; save(); render(); }, null, 'ひらがな/カタカナを切り替え'));
+    c.appendChild(scriptSel());
     c.appendChild(btn(ICON_PRINT, function () { window.print(); }, null, '印刷'));
   }
   if (S.page === 'table') { common(); return; }
@@ -425,6 +439,7 @@ function renderTools() {
     c.appendChild(stepper(r.n, '個', function (v) { r.n = v; save(); renderTools(); }, 1, 99, 1, '個数'));
     c.appendChild(dropdown([[true, '重複なし'], [false, '重複あり']], r.unique, function (v) { r.unique = v; save(); }, '重複'));
     c.appendChild(btn('引く', draw, 'pri'));
+    c.appendChild(scriptSel());
     if (r.src === 'pick') {
       var np = all.filter(function (x) { return r.picked[x.id]; }).length;
       c.appendChild(el('span', 'num', np + ' 字'));
@@ -487,14 +502,24 @@ function renderSettings() {
   function section(title) { s.appendChild(el('h2', null, title)); var grid = el('div', 'fgrid'); s.appendChild(grid); return grid; }
 
   var a = section('表の構成');
-  a.appendChild(fld('「ん」の位置', dropdown({ 'col-top': 'わ行の次・上', 'col-mid': 'わ行の次・中', 'col-bottom': 'わ行の次・下', outside: '表の外', none: '入れない' }, L.n, setL('n'))));
+  var iro = L.order === 'iroha';
+  a.appendChild(fld('並び順', dropdown(G.ORDERS, L.order, function (v) {
+    Object.assign(S.layout, G.PRESETS[v]); save(); render(); // ゐ・ゑ と「ん」の標準も切り替わる
+  })));
+  if (iro) a.appendChild(fld('いろは順の 1 行の字数', dropdown([5, 6, 7, 8, 9, 10, 12, 16].map(function (n) { return [n, n + ' 字']; }), L.irohaW, function (v) { S.layout.irohaW = +v; save(); render(); })));
+  a.appendChild(fld('「ん」', dropdown(iro ? { none: '入れない', 'col-top': '末尾に入れる', outside: '別に置く' } : { 'col-top': 'わ行の次・上', 'col-mid': 'わ行の次・中', 'col-bottom': 'わ行の次・下', outside: '表の外', none: '入れない' }, iro && ['col-mid', 'col-bottom'].indexOf(L.n) >= 0 ? 'col-top' : L.n, setL('n'))));
   a.appendChild(fld('「を」', dropdown({ yes: '入れる', no: '入れない' }, L.wo, setL('wo'))));
-  a.appendChild(fld('ゐ・ゑ など古い字', dropdown({ none: 'なし', some: '一部(ゐ・ゑ)', all: '全部(+や行え・わ行う)' }, L.archaic, setL('archaic'))));
-  a.appendChild(fld('や行・わ行の空き', dropdown({ blank: '空欄', dup: 'い・う・え を薄く' }, L.gapFill, setL('gapFill'))));
+  a.appendChild(fld('「ゐ」', dropdown({ yes: '入れる', no: '入れない' }, L.wi, setL('wi'))));
+  a.appendChild(fld('「ゑ」', dropdown({ yes: '入れる', no: '入れない' }, L.we, setL('we'))));
+  if (!iro) {
+    a.appendChild(fld('や行の古い え(𛀁)', dropdown({ yes: '入れる', no: '入れない' }, L.ye, setL('ye'))));
+    a.appendChild(fld('わ行の古い う(𛄟)', dropdown({ yes: '入れる', no: '入れない' }, L.wu, setL('wu'))));
+    a.appendChild(fld('や行・わ行の空き', dropdown({ blank: '空欄', dup: 'い・う・え を薄く' }, L.gapFill, setL('gapFill'))));
+  }
   G.GROUPS.forEach(function (gr) { a.appendChild(fld(gr.name, dropdown(G.PLACES, L[gr.key], setL(gr.key)))); });
 
   var b = section('見た目');
-  b.appendChild(fld('文字', dropdown({ hira: 'ひらがな', kata: 'カタカナ' }, d.script, setD('script'))));
+  b.appendChild(fld('表記', dropdown(G.SCRIPTS, d.script, setD('script'))));
   b.appendChild(fld('並び', dropdown({ auto: '自動', 'tate-rtl': '縦・右から', 'tate-ltr': '縦・左から', yoko: '横・行ごと' }, d.dir, setD('dir'))));
   var cf = null;
   if (d.font === 'custom') {
@@ -544,7 +569,7 @@ function renderSettings() {
 
 /* ---------- 説明(i) ---------- */
 var INFO = {
-  table: ['五十音表', ['構成と見た目は「設定」で変えられます(上に表を出したまま変更できます)。', '「あ/ア」でひらがな・カタカナ、印刷ボタンで表だけを印刷します。', '設定や記録はこの端末のブラウザに保存されます。']],
+  table: ['五十音表', ['構成と見た目は「設定」で変えられます(上に表を出したまま変更できます)。', '表記のドロップダウンで ひらがな・カタカナ・漢字・ローマ字を切り替え、印刷ボタンで表だけを印刷します。', '設定や記録はこの端末のブラウザに保存されます。']],
   mark: ['チェック表 ― 黒塗り', ['マスを押すと黒く塗りつぶし、もう一度押すと戻ります。', '覚えた字を隠す、使った字を消す、などに。塗ったまま印刷できます。']],
   count: ['チェック表 ― カウント', ['マスを押すたびに回数が増えます。「押すと −1」で減らせます。', '回数が多いマスほど色が濃くなります。']],
   kuji: ['あそび ― 文字くじ', ['「引く」で表の字からランダムに選び、上に大きく出します。', '「選んだ字から」にすると、表で押した字だけが対象です。', '重複ありでは同じ字が何度も出ます。']],
@@ -554,7 +579,10 @@ var INFO = {
   set: ['設定', ['上の表を見ながら変えられます。',
     '並び「自動」は、縦長のスマホでは横・行ごと、広い画面と印刷では縦・右からにします。',
     'マス「画面に合わせる」は収まる最大の大きさ(数字は上限)、「固定」はその大きさ。',
-    'ゐ・ゑ の「全部」は や行え・わ行う も入ります。拗音の ぎゃ・ぴゃ などは濁音・半濁音を入れたときに加わります。']]
+    '並び順を「いろは順」にすると、ゐ・ゑ あり・「ん」なし(いろは歌の 47 字)に切り替わります。あとから個別に変えられます。',
+    '濁音などを「本表に続けて」にしても、いろは順では別の表になります。',
+    '表記の「漢字」は かなのもとになった字(亜・以・宇…)で、濁音などは かなのままです。「ローマ字」は ka・shi・tsu のつづりです。',
+    '拗音の ぎゃ・ぴゃ などは濁音・半濁音を入れたときに加わります。']]
 };
 $('infoBtn').onclick = function () {
   var key = S.page === 'check' ? S.check : S.page === 'play' ? S.play : S.page, it = INFO[key], body = $('dlgBody');
@@ -579,16 +607,16 @@ function renderGame() {
   var hand = $('ghand'), word = $('gword'); hand.innerHTML = ''; word.innerHTML = '';
   g.hand.forEach(function (c, i) {
     if (g.word.indexOf(i) >= 0) return;
-    var b = el('button', 'kc', disp(c.h)); b.dataset.i = i; b.setAttribute('aria-label', disp(c.h) + 'の札'); hand.appendChild(b);
+    var b = el('button', 'kc', dispCard(c.h)); b.dataset.i = i; b.setAttribute('aria-label', dispCard(c.h) + 'の札'); hand.appendChild(b);
   });
   g.word.forEach(function (i, k) {
-    var c = g.hand[i], b = el('button', 'kc w', disp(readOf(c))); b.dataset.k = k;
-    b.setAttribute('aria-label', disp(readOf(c)) + '(押すと手札にもどす)');
+    var c = g.hand[i], b = el('button', 'kc w', dispCard(readOf(c))); b.dataset.k = k;
+    b.setAttribute('aria-label', dispCard(readOf(c)) + '(押すと手札にもどす)');
     if (G.variants(c.h).length > 1) { var a = el('span', 'alt', '゛゜小'); a.dataset.alt = k; b.appendChild(a); }
     word.appendChild(b);
   });
   var log = $('glog'); log.innerHTML = '';
-  g.log.forEach(function (w) { var li = el('li', null, disp(w.w)); li.appendChild(el('small', null, w.p)); log.appendChild(li); });
+  g.log.forEach(function (w) { var li = el('li', null, dispCard(w.w)); li.appendChild(el('small', null, w.p)); log.appendChild(li); });
   $('gok').disabled = g.word.length < 2;
   $('gswap').disabled = !g.deck.length;
   $('gmsg').textContent = !g.deck.length && !g.hand.length ? 'おしまい ' + g.score + ' 点' : !g.deck.length ? '山札がなくなりました' : '';
